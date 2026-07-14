@@ -28,25 +28,27 @@ st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
     :root {
-        --bg-canvas: #05070C;
-        --bg-panel: #0C1018;
-        --bg-panel-2: #10151F;
-        --border-hair: #1C2433;
-        --border-hair-soft: #161C29;
-        --text-primary: #F4F6FA;
-        --text-secondary: #8A93A6;
-        --text-muted: #5B6479;
-        --floodlight: #4FC3F7;
-        --floodlight-dim: rgba(79, 195, 247, 0.12);
-        --boundary: #A6E22E;
-        --boundary-dim: rgba(166, 226, 46, 0.12);
-        --wicket: #FF5C7A;
-        --wicket-dim: rgba(255, 92, 122, 0.12);
-        --amber: #FBBF77;
+        --bg-canvas: #161B24;
+        --bg-panel: #1D2330;
+        --bg-panel-2: #262E3E;
+        --bg-panel-3: #2E3749;
+        --border-hair: #3A4356;
+        --border-hair-soft: #2C3444;
+        --text-primary: #F7F8FB;
+        --text-secondary: #A6AFC4;
+        --text-muted: #747E93;
+        --floodlight: #5FD4FF;
+        --floodlight-dim: rgba(95, 212, 255, 0.14);
+        --boundary: #9BE85C;
+        --boundary-dim: rgba(155, 232, 92, 0.14);
+        --wicket: #FF7A93;
+        --wicket-dim: rgba(255, 122, 147, 0.14);
+        --amber: #FDC77D;
+        --shadow-card: 0 8px 24px rgba(0,0,0,0.28);
     }
 
     html, body, .stApp {
-        background: radial-gradient(ellipse 1200px 600px at 50% -10%, #0B1220 0%, var(--bg-canvas) 55%);
+        background: radial-gradient(ellipse 1300px 650px at 50% -8%, #232B3D 0%, var(--bg-canvas) 55%);
         color: var(--text-primary);
         font-family: 'Inter', sans-serif;
     }
@@ -60,6 +62,9 @@ st.markdown("""
         border-right: 1px solid var(--border-hair);
     }
 
+    /* Add breathing room around the whole app */
+    .block-container { padding-top: 1.6rem; }
+
     /* ---------- Hero header ---------- */
     .hero-wrap {
         position: relative;
@@ -71,7 +76,7 @@ st.markdown("""
         top: -140px; left: 50%;
         transform: translateX(-50%);
         width: 640px; height: 320px;
-        background: radial-gradient(ellipse at center, rgba(79,195,247,0.18) 0%, rgba(79,195,247,0) 70%);
+        background: radial-gradient(ellipse at center, rgba(95,212,255,0.22) 0%, rgba(95,212,255,0) 70%);
         pointer-events: none;
         z-index: 0;
     }
@@ -147,21 +152,24 @@ st.markdown("""
         border: 1px solid var(--border-hair);
         border-radius: 16px;
         padding: 20px 20px 8px 20px;
+        box-shadow: var(--shadow-card);
     }
 
     /* ---------- Metric cards ---------- */
     .stat-card {
         background: var(--bg-panel-2);
         border: 1px solid var(--border-hair);
+        border-left-width: 3px;
         border-radius: 14px;
         padding: 18px 20px;
         margin-bottom: 16px;
-        transition: border-color 0.2s ease, transform 0.2s ease;
+        box-shadow: var(--shadow-card);
+        transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .stat-card:hover { transform: translateY(-1px); }
-    .stat-card.tone-floodlight { border-left: 3px solid var(--floodlight); }
-    .stat-card.tone-boundary   { border-left: 3px solid var(--boundary); }
-    .stat-card.tone-wicket     { border-left: 3px solid var(--wicket); }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.34); }
+    .stat-card.tone-floodlight { border-left-color: var(--floodlight); }
+    .stat-card.tone-boundary   { border-left-color: var(--boundary); }
+    .stat-card.tone-wicket     { border-left-color: var(--wicket); }
 
     .stat-card-head {
         display: flex;
@@ -202,23 +210,31 @@ st.markdown("""
     .forecast-tile {
         background: var(--bg-panel-2);
         border: 1px solid var(--border-hair);
+        border-left-width: 3px;
         border-radius: 14px;
         padding: 16px 18px;
         text-align: left;
+        box-shadow: var(--shadow-card);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+    .forecast-tile:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.34); }
+    .forecast-tile .fhead { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .forecast-tile .fdot { width: 8px; height: 8px; border-radius: 50%; }
     .forecast-tile .flabel { font-size: 12px; color: var(--text-secondary); letter-spacing: 0.02em; }
     .forecast-tile .fvalue {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 600;
-        font-size: 22px;
-        margin-top: 6px;
+        font-size: 26px;
     }
-    .forecast-tile.f-neutral .fvalue { color: var(--floodlight); }
+    .forecast-tile.f-neutral  { border-left-color: var(--floodlight); }
+    .forecast-tile.f-boundary { border-left-color: var(--boundary); }
+    .forecast-tile.f-wicket   { border-left-color: var(--wicket); }
+    .forecast-tile.f-neutral .fdot   { background: var(--floodlight); box-shadow: 0 0 10px rgba(95,212,255,0.55); }
+    .forecast-tile.f-boundary .fdot  { background: var(--boundary); box-shadow: 0 0 10px rgba(155,232,92,0.55); }
+    .forecast-tile.f-wicket .fdot    { background: var(--wicket); box-shadow: 0 0 10px rgba(255,122,147,0.55); }
+    .forecast-tile.f-neutral .fvalue  { color: var(--floodlight); }
     .forecast-tile.f-boundary .fvalue { color: var(--boundary); }
-    .forecast-tile.f-wicket .fvalue { color: var(--wicket); }
-    .forecast-tile.f-neutral  { border-top: 3px solid var(--floodlight); }
-    .forecast-tile.f-boundary { border-top: 3px solid var(--boundary); }
-    .forecast-tile.f-wicket   { border-top: 3px solid var(--wicket); }
+    .forecast-tile.f-wicket .fvalue   { color: var(--wicket); }
 
     /* ---------- Win probability bar ---------- */
     .wp-wrap { margin-top: 4px; margin-bottom: 22px; }
@@ -228,16 +244,18 @@ st.markdown("""
     .wp-labels .val { font-family: 'JetBrains Mono', monospace; }
     .wp-track {
         position: relative;
-        height: 10px;
+        height: 12px;
         border-radius: 999px;
         background: var(--wicket-dim);
         border: 1px solid var(--border-hair);
         overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
     }
     .wp-fill {
         position: absolute; left: 0; top: 0; bottom: 0;
-        background: linear-gradient(90deg, #7BC943 0%, var(--boundary) 100%);
+        background: linear-gradient(90deg, #7BD94A 0%, var(--boundary) 100%);
         border-radius: 999px;
+        box-shadow: 0 0 12px rgba(155,232,92,0.35);
     }
 
     /* ---------- Streamlit input overrides ---------- */
@@ -245,14 +263,28 @@ st.markdown("""
     div[data-testid="stSelectbox"] div,
     div[data-testid="stSlider"] { color: var(--text-primary); }
     div[data-testid="stNumberInput"] input {
-        background-color: var(--bg-panel-2) !important;
+        background-color: var(--bg-panel-3) !important;
         border: 1px solid var(--border-hair) !important;
         border-radius: 8px !important;
     }
+    div[data-testid="stNumberInput"] button {
+        background-color: var(--bg-panel-3) !important;
+        border: 1px solid var(--border-hair) !important;
+    }
     div[data-testid="stSelectbox"] > div > div {
-        background-color: var(--bg-panel-2) !important;
+        background-color: var(--bg-panel-3) !important;
         border: 1px solid var(--border-hair) !important;
         border-radius: 8px !important;
+    }
+    div[data-testid="stSelectbox"] > div > div:focus-within {
+        border-color: var(--floodlight) !important;
+    }
+    div[data-testid="stSlider"] [role="slider"] {
+        background-color: var(--floodlight) !important;
+        box-shadow: 0 0 0 4px rgba(95,212,255,0.18) !important;
+    }
+    div[data-testid="stSlider"] > div > div > div > div {
+        background-color: var(--floodlight) !important;
     }
     label[data-testid="stWidgetLabel"] p {
         font-size: 12.5px !important;
@@ -271,7 +303,7 @@ st.markdown("""
     /* ---------- Tabs ---------- */
     .stTabs [data-baseweb="tab-list"] { gap: 10px; background-color: transparent; border-bottom: 1px solid var(--border-hair); }
     .stTabs [data-baseweb="tab"] {
-        background-color: var(--bg-panel);
+        background-color: var(--bg-panel-2);
         color: var(--text-secondary);
         border-radius: 8px 8px 0 0;
         padding: 11px 22px;
@@ -283,9 +315,9 @@ st.markdown("""
     }
     .stTabs [aria-selected="true"] {
         background-color: var(--floodlight) !important;
-        color: #06101A !important;
+        color: #0A1926 !important;
         font-weight: 700 !important;
-        box-shadow: 0 0 18px rgba(79, 195, 247, 0.35);
+        box-shadow: 0 0 18px rgba(95, 212, 255, 0.4);
     }
 
     /* ---------- Alerts ---------- */
@@ -505,11 +537,11 @@ else:
                 st.markdown('<p class="section-label"><span class="tick"></span>Next-Ball Event Forecast</p>', unsafe_allow_html=True)
                 pm1, pm2, pm3 = st.columns(3)
                 with pm1:
-                    st.markdown(f'<div class="forecast-tile f-neutral"><div class="flabel">Single / Dot</div><div class="fvalue">{ml_p[0]*100:.1f}%</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="forecast-tile f-neutral"><div class="fhead"><span class="fdot"></span><span class="flabel">Single / Dot</span></div><div class="fvalue">{ml_p[0]*100:.1f}%</div></div>', unsafe_allow_html=True)
                 with pm2:
-                    st.markdown(f'<div class="forecast-tile f-boundary"><div class="flabel">Boundary</div><div class="fvalue">{ml_p[1]*100:.1f}%</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="forecast-tile f-boundary"><div class="fhead"><span class="fdot"></span><span class="flabel">Boundary</span></div><div class="fvalue">{ml_p[1]*100:.1f}%</div></div>', unsafe_allow_html=True)
                 with pm3:
-                    st.markdown(f'<div class="forecast-tile f-wicket"><div class="flabel">Dismissal Risk</div><div class="fvalue">{ml_p[2]*100:.1f}%</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="forecast-tile f-wicket"><div class="fhead"><span class="fdot"></span><span class="flabel">Dismissal Risk</span></div><div class="fvalue">{ml_p[2]*100:.1f}%</div></div>', unsafe_allow_html=True)
             except Exception as ml_err:
                 st.error(f"⚠️ ML Prediction Error: {str(ml_err)}")
 
