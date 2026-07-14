@@ -3,69 +3,105 @@ import urllib.request
 import zipfile
 import io
 import pandas as pd
-import sqlite3
+import snowflake.connector
+from snowflake.connector.pandas_tools import write_pandas
+from dotenv import load_dotenv
 
-def download_and_stage_full_data():
-    """
-    Step 1: Enterprise-Scale Extract & Load Pipeline
-    Downloads the complete historical archive from Cricsheet and loops
-    through every single historical IPL match file to build a massive warehouse.
-    """
-    print("🚀 Step 1: Starting Enterprise Bulk Data Ingestion...")
-    
-    RAW_DATA_DIR = os.path.join("data", "1_raw")
-    PROCESSED_DATA_DIR = os.path.join("data", "2_processed")
-    DB_PATH = os.path.join(PROCESSED_DATA_DIR, "cricket_analytics.db")
-    
+load_dotenv()
+
+def upload_raw_data_to_snowflake():
+    print("🚀 Starting Enterprise Snowflake Cloud Ingestion...")
     CRICSHEET_URL = "https://cricsheet.org/downloads/ipl_csv2.zip"
     
-    # --- FETCH & DOWNLOAD ARCHIVE ---
-    print("📥 Connecting to Cricsheet to fetch the full historical IPL database...")
+    print("📥 Connecting to Cricsheet to extract the historical dataset split...")
     try:
         response = urllib.request.urlopen(CRICSHEET_URL)
         zip_data = zipfile.ZipFile(io.BytesIO(response.read()))
-        print("✅ Archive successfully loaded into system memory.")
+        print("✅ Historical zip bundle loaded successfully into memory buffers.")
     except Exception as e:
-        print(f"❌ Network connection failed. Error: {e}")
+        print(f"❌ Network operation failed. Error trace: {e}")
         return
 
-    # --- FILTER VALID MATCH FILES ---
     csv_files = [f for f in zip_data.namelist() if f.endswith('.csv') and not f.endswith('_info.csv')]
     total_matches = len(csv_files)
-    print(f"📦 Total historical matches discovered in archive: {total_matches}")
+    print(f"📦 Discovered {total_matches} historical match profiles to stream.")
     
-    # --- FULL SCALE PROCESSING LOOP ---
-    print(f"⏳ Bulk ingesting ALL {total_matches} matches into SQL Staging Layer...")
-    
-    conn = sqlite3.connect(DB_PATH)
-    
-    # Optimization: Speed up batch execution by turning off sync constraints temporarily
-    conn.execute("PRAGMA synchronous = OFF")
-    conn.execute("PRAGMA journal_mode = MEMORY")
+    print("⏳ Parsing data files and enforcing uniform column types...")
+    master_df_list = []
     
     for idx, match_file in enumerate(csv_files):
         with zip_data.open(match_file) as f:
-            df_match = pd.read_csv(f)
+            df_match = pd.read_csv(f, low_memory=False, dtype={'season': str})
             
-        df_match.columns = df_match.columns.str.strip().str.replace(' ', '_').str.lower()
+        df_match.columns = df_match.columns.str.strip().str.replace(' ', '_').str.upper()
+        master_df_list.append(df_match)
         
-        # Write to SQL: Replace on the first iteration, append for all others
-        if idx == 0:
-            df_match.to_sql('raw_deliveries', conn, if_exists='replace', index=False)
-            
-            # Save a single raw match sample onto disk for record keeping
-            raw_output_path = os.path.join(RAW_DATA_DIR, match_file)
-            with open(raw_output_path, 'wb') as f_out:
-                f_out.write(zip_data.read(match_file))
-        else:
-            df_match.to_sql('raw_deliveries', conn, if_exists='append', index=False)
-            
-        # Log progression checkpoints every 100 matches
-        if (idx + 1) % 100 == 0:
-            print(f"|--- Progress Checkpoint: Ingested {idx + 1}/{total_matches} matches...")
+        if (idx + 1) % 200 == 0:
+            print(f"|--- Compiled {idx + 1}/{total_matches} match data arrays...")
 
-    conn.close()
-    print("🎉 Step 1 Complete: Entire historical IPL dataset warehouse-staged!")
+    print("🥞 Stacking data frames into a consolidated database matrix...")
+    final_raw_df = pd.concat(master_df_list, ignore_index=True)
+    final_raw_df['SEASON'] = final_raw_df['SEASON'].astype(str)
+    final_raw_df.columns = final_raw_df.columns.str.upper()
+
+    # --- SCHEMA FIX INTERCEPTOR ---
+    # Define the precise list of columns our Snowflake database schema accepts
+    target_columns = [
+        'MATCH_ID', 'SEASON', 'START_DATE', 'VENUE', 'INNINGS', 'BALL',
+        'BATTING_TEAM', 'BOWLING_TEAM', 'STRIKER', 'NON_STRIKER', 'BOWLER',
+        'RUNS_OFF_BAT', 'EXTRAS', 'WIDES', 'NOBALLS', 'BYES', 'LEGBYES', 'PENALTY',
+        'WICKET_TYPE', 'PLAYER_DISMISSED', 'OTHER_WICKET_TYPE', 'OTHER_PLAYER_DISMISSED'
+    ]
+    
+    # Dynamically pad any completely missing structural fields with safe default null indicators
+    for col in target_columns:
+        if col not in final_raw_df.columns:
+            final_raw_df[col] = None
+            
+    # Explicitly filter the dataframe down to contain ONLY the target table configuration layout
+    print("🧹 Aligning DataFrame matrix directly to production warehouse schema...")
+    final_raw_df = final_raw_df[target_columns]
+
+    print("🔌 Connecting securely to the Snowflake Cloud Data Platform...")
+    try:
+        ctx = snowflake.connector.connect(
+            user=os.getenv("SF_USER"),
+            password=os.getenv("SF_PASSWORD"),
+            account=os.getenv("SF_ACCOUNT"),
+            warehouse=os.getenv("SF_WAREHOUSE"),
+            database=os.getenv("SF_DATABASE"),
+            schema=os.getenv("SF_SCHEMA")
+        )
+        cursor = ctx.cursor()
+        print("✅ Secure cloud operational handshake complete.")
+    except Exception as e:
+        print(f"❌ Connection block failed. Verify authentication fields: {e}")
+        return
+
+    print("🧱 Initializing staging landing structures...")
+    cursor.execute("""
+    CREATE OR REPLACE TABLE RAW_DELIVERIES (
+        MATCH_ID INT, SEASON VARCHAR, START_DATE VARCHAR, VENUE VARCHAR, INNINGS INT, BALL FLOAT,
+        BATTING_TEAM VARCHAR, BOWLING_TEAM VARCHAR, STRIKER VARCHAR, NON_STRIKER VARCHAR, BOWLER VARCHAR,
+        RUNS_OFF_BAT INT, EXTRAS INT, WIDES INT, NOBALLS INT, BYES INT, LEGBYES INT, PENALTY INT,
+        WICKET_TYPE VARCHAR, PLAYER_DISMISSED VARCHAR, OTHER_WICKET_TYPE VARCHAR, OTHER_PLAYER_DISMISSED VARCHAR
+    );
+    """)
+
+    print(f"⚡ Streaming {len(final_raw_df):,} total row vectors up to the warehouse platform...")
+    success, nchunks, nrows, _ = write_pandas(
+        conn=ctx,
+        df=final_raw_df,
+        table_name='RAW_DELIVERIES',
+        database=os.getenv("SF_DATABASE"),
+        schema=os.getenv("SF_SCHEMA")
+    )
+    
+    print(f"🎉 Success! Ingested {nrows:,} rows across {nchunks} streaming compute clusters directly into Snowflake.")
+    
+    cursor.close()
+    ctx.close()
+    print("🏆 Step 1 Production Cloud Migration Complete!")
 
 if __name__ == "__main__":
-    download_and_stage_full_data()
+    upload_raw_data_to_snowflake()
