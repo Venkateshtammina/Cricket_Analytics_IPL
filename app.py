@@ -17,51 +17,82 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Premium UI styling framework injection (Glassmorphism & Sports Analytics Dark Mode)
+# Deep-Tech Elite Sports UI Styling Framework Injected Globally
 st.markdown("""
 <style>
-    .stApp { background-color: #0d0f13; color: #f3f4f6; }
-    div[data-testid="stSidebar"] { background-color: #131722; border-right: 1px solid #1f293d; }
+    /* Global Background and Canvas Setup */
+    .stApp { background-color: #080A0F; color: #F3F4F6; font-family: 'Inter', sans-serif; }
     
+    /* Sidebar Overhaul */
+    div[data-testid="stSidebar"] { background-color: #0D111A; border-right: 1px solid #1E293B; }
+    
+    /* Premium Glassmorphic Matchup Layout Cards */
     .metric-card-neutral {
-        background-color: #1c2030;
-        padding: 22px;
-        border-radius: 12px;
-        border-left: 5px solid #38bdf8;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        margin-bottom: 15px;
+        background: linear-gradient(135deg, #111625 0%, #0F1320 100%);
+        padding: 24px;
+        border-radius: 14px;
+        border: 1px solid #1E293B;
+        border-top: 4px solid #38BDF8;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        margin-bottom: 20px;
     }
     .metric-card-success {
-        background-color: #1c2030;
-        padding: 22px;
-        border-radius: 12px;
-        border-left: 5px solid #10b981;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        margin-bottom: 15px;
+        background: linear-gradient(135deg, #111625 0%, #0F1320 100%);
+        padding: 24px;
+        border-radius: 14px;
+        border: 1px solid #1E293B;
+        border-top: 4px solid #10B981;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        margin-bottom: 20px;
     }
     .metric-card-alert {
-        background-color: #1c2030;
-        padding: 22px;
-        border-radius: 12px;
-        border-left: 5px solid #ef4444;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        margin-bottom: 15px;
+        background: linear-gradient(135deg, #111625 0%, #0F1320 100%);
+        padding: 24px;
+        border-radius: 14px;
+        border: 1px solid #1E293B;
+        border-top: 4px solid #EF4444;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        margin-bottom: 20px;
     }
+    
+    /* Sub-text variables formatting */
     .sub-metric-text {
-        margin: 5px 0 0 0; 
+        margin: 8px 0 0 0; 
         font-size: 13px; 
-        color: #9ca3af;
-        line-height: 1.4;
+        color: #9CA3AF;
+        letter-spacing: 0.3px;
     }
-    h1, h2, h3 { font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: -0.5px; }
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
+    .sub-metric-text b { color: #E5E7EB; }
+    
+    /* Streamlit Input Component Overrides for Dark Mode Symmetry */
+    div[data-testid="stNumberInput"] input, div[data-testid="stSelectbox"] div {
+        background-color: #111625 !important;
+        color: #F3F4F6 !important;
+        border: 1px solid #1E293B !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Typography Overrides */
+    h1, h2, h3 { font-weight: 700; letter-spacing: -0.03em; color: #FFFFFF !important; }
+    
+    /* Tab Component Styling */
+    .stTabs [data-baseweb="tab-list"] { gap: 12px; background-color: transparent; border-bottom: 2px solid #1E293B; }
     .stTabs [data-baseweb="tab"] {
-        background-color: #1c2030;
-        color: #9ca3af;
-        border-radius: 6px 6px 0 0;
-        padding: 10px 20px;
+        background-color: #111625;
+        color: #9CA3AF;
+        border-radius: 8px 8px 0 0;
+        padding: 12px 24px;
+        border: 1px solid #1E293B;
+        border-bottom: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
     }
-    .stTabs [aria-selected="true"] { background-color: #38bdf8 !important; color: #0d0f13 !important; font-weight: bold; }
+    .stTabs [aria-selected="true"] { 
+        background-color: #38BDF8 !important; 
+        color: #080A0F !important; 
+        font-weight: 700 !important; 
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -180,14 +211,14 @@ model, encoders = load_ml_objects()
 df_rosters = get_team_rosters()
 
 if model is None or df_rosters.empty:
-    st.error("❌ Critical system initialization files missing context coordinates.")
+    st.error("❌ Critical system initialization files missing database context mappings.")
 else:
     all_batters_global = sorted(df_rosters[df_rosters['ROLE'] == 'batter']['PLAYER'].unique())
     all_bowlers_global = sorted(df_rosters[df_rosters['ROLE'] == 'bowler']['PLAYER'].unique())
     all_teams = sorted(df_rosters['TEAM'].unique())
     
     st.title("⚡ IPL STRATEGY ENGINE")
-    st.markdown("<p style='color:#6b7280; margin-top:-15px;'>Enterprise Predictive Analytics Center</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#6B7280; font-size: 15px; margin-top:-15px;'>Enterprise Smart Predictive Operations Center</p>", unsafe_allow_html=True)
     st.markdown("---")
     
     tab1, tab2 = st.tabs(["📊 Live Simulation Deck", "🛡️ Franchise Matchup Matrix Board"])
@@ -211,13 +242,13 @@ else:
             with k_prof1:
                 b_sr = (bat_p['RUNS'] / bat_p['BALLS']) * 100 if bat_p['BALLS'] > 0 else 0
                 b_avg = bat_p['RUNS'] / int(bat_p['TOTAL_DISMISSALS']) if int(bat_p['TOTAL_DISMISSALS']) > 0 else bat_p['RUNS'] / max(int(bat_p['TOTAL_INNINGS']), 1)
-                st.markdown(f"<div class='metric-card-neutral'><h5>{sim_batter}</h5><h2>{int(bat_p['RUNS'])} Runs</h2><p class='sub-metric-text'><b>Avg:</b> {b_avg:.2f} | <b>SR:</b> {b_sr:.1f} | <b>Inn:</b> {int(bat_p['TOTAL_INNINGS'])}</p></div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='metric-card-neutral'><h5>{sim_batter} (Career)</h5><h2>{int(bat_p['RUNS'])} Runs</h2><p class='sub-metric-text'><b>Avg:</b> {b_avg:.2f} &nbsp;|&nbsp; <b>SR:</b> {b_sr:.1f} &nbsp;|&nbsp; <b>Inn:</b> {int(bat_p['TOTAL_INNINGS'])}</p></div>", unsafe_allow_html=True)
             with k_prof2:
                 bw_econ = (bowl_p['RUNS_CONCEDED'] / bowl_p['BALLS_BOWLED']) * 6 if bowl_p['BALLS_BOWLED'] > 0 else 0
                 bw_wickets = int(bowl_p['WICKETS_TAKEN'])
                 bw_avg = bowl_p['RUNS_CONCEDED'] / bw_wickets if bw_wickets > 0 else np.nan
                 avg_str = f"{bw_avg:.2f}" if not np.isnan(bw_avg) else "N/A"
-                st.markdown(f"<div class='metric-card-alert'><h5>{sim_bowler}</h5><h2>{bw_wickets} Wickets</h2><p class='sub-metric-text'><b>Econ:</b> {bw_econ:.2f} | <b>Avg:</b> {avg_str}</p></div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='metric-card-alert'><h5>{sim_bowler} (Career)</h5><h2>{bw_wickets} Wickets</h2><p class='sub-metric-text'><b>Econ:</b> {bw_econ:.2f} &nbsp;|&nbsp; <b>Avg:</b> {avg_str} &nbsp;|&nbsp; <b>Balls:</b> {int(bowl_p['BALLS_BOWLED'])}</p></div>", unsafe_allow_html=True)
             
             total_balls_bowled = int(overs_completed) * 6 + int((overs_completed - int(overs_completed)) * 10)
             balls_remaining = max(120 - total_balls_bowled, 0)
@@ -232,12 +263,9 @@ else:
             with w_c2: st.metric("Defending Team Chance", f"{(100.0 - win_pct):.1f}%")
             st.progress(win_pct / 100.0)
             
-            # --- FIXED 6-FEATURE ML MATRIX IMPLEMENTATION ---
             try:
                 bat_enc = encoders['striker'].transform([sim_batter])[0]
                 bow_enc = encoders['bowler'].transform([sim_bowler])[0]
-                
-                # Maps exactly to ['striker', 'bowler', 'balls_remaining', 'current_wickets_lost', 'current_run_rate', 'required_run_rate']
                 v = np.array([[bat_enc, bow_enc, balls_remaining, wickets_down, crr, rrr]])
                 ml_p = model.predict_proba(v)[0]
                 
@@ -269,11 +297,11 @@ else:
                 h2h_1, _, bowl_prof = get_detailed_stats(batter_1, bowler)
                 b_enc = encoders['bowler'].transform([bowler])[0]
                 b1_enc = encoders['striker'].transform([batter_1])[0]
-                v1 = np.array([[b1_enc, b_enc, 30, 3, 7.5, 9.0]]) # 6 features fixed
+                v1 = np.array([[b1_enc, b_enc, 30, 3, 7.5, 9.0]]) 
                 p1 = model.predict_proba(v1)[0]
                 
                 b2_enc = encoders['striker'].transform([batter_2])[0]
-                v2 = np.array([[b2_enc, b_enc, 30, 3, 7.5, 9.0]]) # 6 features fixed
+                v2 = np.array([[b2_enc, b_enc, 30, 3, 7.5, 9.0]]) 
                 p2 = model.predict_proba(v2)[0]
                 
                 analysis_records.append({
