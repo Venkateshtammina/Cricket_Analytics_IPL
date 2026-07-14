@@ -328,8 +328,7 @@ This project is intended for educational and analytical purposes.
 
 **Venkatesh Tammina**
 
-GitHub:
-https://github.com/Venkateshtammina
+Live:https://venkateshtammina-cricket-analytics-ipl-app-iiyn1q.streamlit.app/
 
 ---
 
