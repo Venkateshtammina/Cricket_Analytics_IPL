@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 from dotenv import load_dotenv
 
-# Initialize tracking environment parameters
+# Initialize application configuration mapping
 load_dotenv()
 
 # Set premium dashboard layout configuration
@@ -23,7 +23,6 @@ st.markdown("""
     .stApp { background-color: #0d0f13; color: #f3f4f6; }
     div[data-testid="stSidebar"] { background-color: #131722; border-right: 1px solid #1f293d; }
     
-    /* Custom metric card designs */
     .metric-card-neutral {
         background-color: #1c2030;
         padding: 22px;
@@ -103,7 +102,7 @@ def load_ml_objects():
         return model, encoders
     return None, None
 
-@st.cache_data(ttl=7200) # Cache rosters for 2 hours to accelerate navigation loading
+@st.cache_data(ttl=7200) 
 def get_team_rosters():
     ctx = get_snowflake_connection()
     recent_matches_query = "SELECT DISTINCT MATCH_ID FROM RAW_DELIVERIES ORDER BY MATCH_ID DESC LIMIT 25"
@@ -122,7 +121,7 @@ def get_team_rosters():
     ctx.close()
     return df_rosters
 
-@st.cache_data(ttl=7200) # Cache static profiles to completely cut network trip overheads
+@st.cache_data(ttl=7200) 
 def get_detailed_stats(batter, bowler):
     ctx = get_snowflake_connection()
     h2h_query = "SELECT COALESCE(SUM(RUNS_OFF_BAT), 0) as TOTAL_RUNS, COUNT(BALL) as TOTAL_BALLS, COALESCE(SUM(CASE WHEN PLAYER_DISMISSED IS NOT NULL AND WICKET_TYPE IS NOT NULL THEN 1 ELSE 0 END), 0) as TOTAL_WICKETS FROM RAW_DELIVERIES WHERE STRIKER = %s AND BOWLER = %s"
@@ -136,7 +135,7 @@ def get_detailed_stats(batter, bowler):
     ctx.close()
     return df_h2h, df_bat, df_bowl
 
-@st.cache_data(ttl=7200) # High-Performance Cache Layer isolates KNN candidate matrix updates
+@st.cache_data(ttl=7200) 
 def fetch_knn_candidate_pool(balls_left):
     ctx = get_snowflake_connection()
     query = """
@@ -181,17 +180,17 @@ model, encoders = load_ml_objects()
 df_rosters = get_team_rosters()
 
 if model is None or df_rosters.empty:
-    st.error("❌ Critical System Ingestion block missing configuration parameters.")
+    st.error("❌ Critical system initialization files missing context coordinates.")
 else:
     all_batters_global = sorted(df_rosters[df_rosters['ROLE'] == 'batter']['PLAYER'].unique())
     all_bowlers_global = sorted(df_rosters[df_rosters['ROLE'] == 'bowler']['PLAYER'].unique())
     all_teams = sorted(df_rosters['TEAM'].unique())
     
     st.title("⚡ IPL STRATEGY ENGINE")
-    st.markdown("<p style='color:#6b7280; margin-top:-15px;'>Enterprise Smart Predictive Operations Center</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#6b7280; margin-top:-15px;'>Enterprise Predictive Analytics Center</p>", unsafe_allow_html=True)
     st.markdown("---")
     
-    tab1, tab2 = st.tabs(["📊 Live Simulation Deck", "🛡️ Franchise Matrix Board"])
+    tab1, tab2 = st.tabs(["📊 Live Simulation Deck", "🛡️ Franchise Matchup Matrix Board"])
     
     with tab1:
         c_setup1, c_setup2 = st.columns([1, 2], gap="large")
@@ -233,10 +232,13 @@ else:
             with w_c2: st.metric("Defending Team Chance", f"{(100.0 - win_pct):.1f}%")
             st.progress(win_pct / 100.0)
             
+            # --- FIXED 6-FEATURE ML MATRIX IMPLEMENTATION ---
             try:
                 bat_enc = encoders['striker'].transform([sim_batter])[0]
                 bow_enc = encoders['bowler'].transform([sim_bowler])[0]
-                v = np.array([[bat_enc, bow_enc, 25, 15, balls_remaining, wickets_down, crr, rrr]])
+                
+                # Maps exactly to ['striker', 'bowler', 'balls_remaining', 'current_wickets_lost', 'current_run_rate', 'required_run_rate']
+                v = np.array([[bat_enc, bow_enc, balls_remaining, wickets_down, crr, rrr]])
                 ml_p = model.predict_proba(v)[0]
                 
                 st.markdown("### 🔮 Next-Ball Event Forecast Vectors")
@@ -244,7 +246,8 @@ else:
                 with pm1: st.markdown(f"<div class='metric-card-neutral'><h5>Single / Dot</h5><h3>{ml_p[0]*100:.1f}%</h3></div>", unsafe_allow_html=True)
                 with pm2: st.markdown(f"<div class='metric-card-success'><h5>Boundary</h5><h3>{ml_p[1]*100:.1f}%</h3></div>", unsafe_allow_html=True)
                 with pm3: st.markdown(f"<div class='metric-card-alert'><h5>Dismissal Risk</h5><h3>{ml_p[2]*100:.1f}%</h3></div>", unsafe_allow_html=True)
-            except Exception: pass
+            except Exception as ml_err:
+                st.error(f"⚠️ ML Prediction Error: {str(ml_err)}")
 
     with tab2:
         st.header("Opposing Franchise Matchup Matrix Board")
@@ -266,11 +269,11 @@ else:
                 h2h_1, _, bowl_prof = get_detailed_stats(batter_1, bowler)
                 b_enc = encoders['bowler'].transform([bowler])[0]
                 b1_enc = encoders['striker'].transform([batter_1])[0]
-                v1 = np.array([[b1_enc, b_enc, 20, 15, 30, 3, 7.5, 9.0]])
+                v1 = np.array([[b1_enc, b_enc, 30, 3, 7.5, 9.0]]) # 6 features fixed
                 p1 = model.predict_proba(v1)[0]
                 
                 b2_enc = encoders['striker'].transform([batter_2])[0]
-                v2 = np.array([[b2_enc, b_enc, 15, 12, 30, 3, 7.5, 9.0]])
+                v2 = np.array([[b2_enc, b_enc, 30, 3, 7.5, 9.0]]) # 6 features fixed
                 p2 = model.predict_proba(v2)[0]
                 
                 analysis_records.append({
