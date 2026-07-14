@@ -18,39 +18,36 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# Design tokens: "analyst desk" — a clean, light, professional dashboard
-# theme. Soft neutral gray canvas, white cards with hairline borders and
-# quiet shadows, and a restrained professional palette (deep blue, forest
-# green, brick red) rather than neon broadcast colors. Numbers still render
-# in a monospace face for a data-desk feel, kept subtle rather than loud.
+# Design tokens: "Dark Operations Center" — fully adapted for a premium
+# dark slate canvas. Replaces warm light colors with deep muted panel tones
+# (#222A3B) and sharp high-contrast text for maximum legibility in low light.
 # ---------------------------------------------------------------------------
 st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
     :root {
-        --bg-canvas: #F3F5F9;
-        --bg-panel: #FFFFFF;
-        --bg-panel-2: #FFFFFF;
-        --bg-panel-3: #F3F5F9;
-        --border-hair: #E1E5EE;
-        --border-hair-soft: #ECEFF5;
-        --text-primary: #10192E;
-        --text-secondary: #5C6579;
-        --text-muted: #8A93A6;
-        --floodlight: #1C5FCC;
-        --floodlight-dim: rgba(28, 95, 204, 0.08);
-        --boundary: #178A4C;
-        --boundary-dim: rgba(23, 138, 76, 0.08);
-        --wicket: #D33A3A;
-        --wicket-dim: rgba(211, 58, 58, 0.07);
-        --amber: #B4690E;
-        --shadow-card: 0 1px 2px rgba(16,24,45,0.04), 0 6px 16px rgba(16,24,45,0.06);
-        --shadow-card-hover: 0 4px 8px rgba(16,24,45,0.05), 0 12px 24px rgba(16,24,45,0.09);
+        --bg-canvas: #21293B; /* Deep Dark Slate Canvas */
+        --bg-panel: #454545;  /* Sleek Dark Muted Panel Color */
+        --bg-panel-2: #2B354A; /* Elevated panel surface */
+        --bg-panel-3: #1F2736; /* Internal recessed surface for inputs */
+        --border-hair: #323D54; /* Muted slate border accents */
+        --border-hair-soft: #2E384C;
+        --text-primary: #FFFFFF; /* High-contrast white for headers */
+        --text-secondary: #C5CEE0; /* Soft silvery blue-gray for metadata */
+        --text-muted: #8F9BB3;
+        --floodlight: #3366FF;
+        --floodlight-dim: rgba(51, 102, 255, 0.15);
+        --boundary: #00E676;
+        --boundary-dim: rgba(0, 230, 118, 0.15);
+        --wicket: #FF3D71;
+        --wicket-dim: rgba(255, 61, 113, 0.15);
+        --shadow-card: 0 4px 10px rgba(0,0,0,0.3);
+        --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.45);
     }
 
     html, body, .stApp {
-        background: var(--bg-canvas);
+        background: var(--bg-canvas) !important;
         color: var(--text-primary);
         font-family: 'Inter', sans-serif;
     }
@@ -60,7 +57,7 @@ st.markdown("""
         position: fixed;
         top: 0; left: 0; right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #123B85 0%, var(--floodlight) 45%, #4E8FE0 100%);
+        background: linear-gradient(90deg, #102A43 0%, var(--floodlight) 45%, #62B7FC 100%);
         z-index: 999;
     }
 
@@ -69,7 +66,7 @@ st.markdown("""
 
     /* ---------- Sidebar ---------- */
     div[data-testid="stSidebar"] {
-        background-color: #FFFFFF;
+        background-color: var(--bg-panel);
         border-right: 1px solid var(--border-hair);
     }
 
@@ -79,7 +76,7 @@ st.markdown("""
     /* ---------- Hero header ---------- */
     .hero-wrap {
         position: relative;
-        background: #FFFFFF;
+        background: var(--bg-panel);
         border: 1px solid var(--border-hair);
         border-radius: 18px;
         padding: 22px 28px;
@@ -96,17 +93,17 @@ st.markdown("""
         position: absolute;
         top: 0; right: 0;
         width: 340px; height: 100%;
-        background: radial-gradient(ellipse at top right, rgba(28,95,204,0.06) 0%, rgba(28,95,204,0) 70%);
+        background: radial-gradient(ellipse at top right, rgba(51, 102, 255, 0.1) 0%, rgba(51, 102, 255, 0) 70%);
         pointer-events: none;
     }
     .hero-left { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
     .hero-badge {
         width: 52px; height: 52px;
         border-radius: 14px;
-        background: linear-gradient(145deg, #123B85 0%, var(--floodlight) 100%);
+        background: linear-gradient(145deg, #102A43 0%, var(--floodlight) 100%);
         display: flex; align-items: center; justify-content: center;
         font-size: 24px;
-        box-shadow: 0 6px 16px rgba(28,95,204,0.28);
+        box-shadow: 0 6px 16px rgba(51,102,255,0.3);
         flex-shrink: 0;
     }
     .hero-title {
@@ -146,23 +143,23 @@ st.markdown("""
         font-size: 11px;
         font-weight: 600;
         letter-spacing: 0.08em;
-        color: var(--wicket);
+        color: #FF3D71;
         background: var(--wicket-dim);
-        border: 1px solid rgba(211,58,58,0.22);
+        border: 1px solid rgba(255,61,113,0.3);
         padding: 6px 12px 6px 9px;
         border-radius: 999px;
     }
     .live-dot {
         width: 7px; height: 7px;
         border-radius: 50%;
-        background: var(--wicket);
-        box-shadow: 0 0 0 0 rgba(211,58,58,0.45);
+        background: #FF3D71;
+        box-shadow: 0 0 0 0 rgba(255,61,113,0.45);
         animation: pulse-dot 1.8s infinite;
     }
     @keyframes pulse-dot {
-        0%   { box-shadow: 0 0 0 0 rgba(211,58,58,0.4); }
-        70%  { box-shadow: 0 0 0 7px rgba(211,58,58,0); }
-        100% { box-shadow: 0 0 0 0 rgba(211,58,58,0); }
+        0%   { box-shadow: 0 0 0 0 rgba(255,61,113,0.4); }
+        70%  { box-shadow: 0 0 0 7px rgba(255,61,113,0); }
+        100% { box-shadow: 0 0 0 0 rgba(255,61,113,0); }
     }
     .hr-fade {
         height: 1px;
@@ -188,7 +185,7 @@ st.markdown("""
 
     /* ---------- Config panel ---------- */
     .config-panel {
-        background: #FFFFFF;
+        background: var(--bg-panel);
         border: 1px solid var(--border-hair);
         border-radius: 16px;
         padding: 20px 20px 8px 20px;
@@ -197,7 +194,7 @@ st.markdown("""
 
     /* ---------- Metric cards ---------- */
     .stat-card {
-        background: #FFFFFF;
+        background: var(--bg-panel);
         border: 1px solid var(--border-hair);
         border-left-width: 3px;
         border-radius: 14px;
@@ -249,7 +246,7 @@ st.markdown("""
 
     /* Forecast tiles */
     .forecast-tile {
-        background: #FFFFFF;
+        background: var(--bg-panel);
         border: 1px solid var(--border-hair);
         border-left-width: 3px;
         border-radius: 14px;
@@ -280,7 +277,7 @@ st.markdown("""
     /* ---------- Win probability bar ---------- */
     .wp-wrap {
         margin-top: 4px; margin-bottom: 22px;
-        background: #FFFFFF;
+        background: var(--bg-panel);
         border: 1px solid var(--border-hair);
         border-radius: 14px;
         padding: 18px 20px;
@@ -298,19 +295,44 @@ st.markdown("""
         position: relative;
         height: 10px;
         border-radius: 999px;
-        background: var(--wicket-dim);
+        background: var(--bg-panel-3);
         overflow: hidden;
     }
     .wp-fill {
         position: absolute; left: 0; top: 0; bottom: 0;
-        background: linear-gradient(90deg, #229356 0%, var(--boundary) 100%);
+        background: linear-gradient(90deg, #00E676 0%, var(--boundary) 100%);
         border-radius: 999px;
     }
 
     /* ---------- Streamlit input overrides ---------- */
     div[data-testid="stNumberInput"] input,
-    div[data-testid="stSelectbox"] div,
-    div[data-testid="stSlider"] { color: var(--text-primary); }
+    div[data-testid="stSlider"] { color: #FFFFFF !important; font-weight: 500; }
+    
+    /* Force dynamic white text inside dark background selection controls */
+    div[data-testid="stSelectbox"] * {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+    
+    /* Tabs Overrides: Pure luminous white/light alignment for tab operations */
+    .stTabs [data-baseweb="tab-list"] button,
+    .stTabs [data-baseweb="tab-list"] button *,
+    .stTabs [data-baseweb="tab"] p,
+    .stTabs [data-baseweb="tab"] div,
+    .stTabs [data-baseweb="tab"] span {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-weight: 600 !important;
+    }
+
+    /* Popover menu options contrast alignments */
+    div[data-baseweb="popover"] *,
+    ul[role="listbox"] * {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        background-color: var(--bg-panel-2) !important;
+    }
+
     div[data-testid="stNumberInput"] input {
         background-color: var(--bg-panel-3) !important;
         border: 1px solid var(--border-hair) !important;
@@ -327,11 +349,11 @@ st.markdown("""
     }
     div[data-testid="stSelectbox"] > div > div:focus-within {
         border-color: var(--floodlight) !important;
-        box-shadow: 0 0 0 3px rgba(28,95,204,0.12) !important;
+        box-shadow: 0 0 0 3px rgba(51,102,255,0.2) !important;
     }
     div[data-testid="stSlider"] [role="slider"] {
         background-color: var(--floodlight) !important;
-        box-shadow: 0 0 0 4px rgba(28,95,204,0.14) !important;
+        box-shadow: 0 0 0 4px rgba(51,102,255,0.25) !important;
     }
     div[data-testid="stSlider"] > div > div > div > div {
         background-color: var(--floodlight) !important;
@@ -355,10 +377,10 @@ st.markdown("""
     /* ---------- Typography ---------- */
     h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--text-primary) !important; }
 
-    /* ---------- Tabs (segmented control) ---------- */
+    /* ---------- Tabs (segmented controls layout framework) ---------- */
     .stTabs [data-baseweb="tab-list"] {
         gap: 4px;
-        background-color: #EBEEF4;
+        background-color: var(--bg-panel-2);
         border: 1px solid var(--border-hair);
         border-radius: 12px;
         padding: 4px;
@@ -367,25 +389,21 @@ st.markdown("""
     }
     .stTabs [data-baseweb="tab"] {
         background-color: transparent;
-        color: var(--text-secondary);
         border-radius: 9px;
         padding: 9px 20px;
         border: none;
         font-size: 13.5px;
-        font-weight: 500;
         transition: all 0.2s ease;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #FFFFFF !important;
-        color: var(--text-primary) !important;
-        font-weight: 600 !important;
-        box-shadow: 0 1px 2px rgba(16,24,45,0.06), 0 2px 6px rgba(16,24,45,0.08);
+        background-color: var(--floodlight) !important;
+        box-shadow: 0 2px 8px rgba(51,102,255,0.4);
     }
     .stTabs [data-baseweb="tab-highlight"] { display: none; }
     .stTabs [data-baseweb="tab-border"] { display: none; }
 
     /* ---------- Alerts ---------- */
-    div[data-testid="stAlert"] { border-radius: 12px; }
+    div[data-testid="stAlert"] { border-radius: 12px; background-color: var(--bg-panel); border: 1px solid var(--border-hair); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -451,10 +469,10 @@ def get_detailed_stats(batter, bowler):
     h2h_query = "SELECT COALESCE(SUM(RUNS_OFF_BAT), 0) as TOTAL_RUNS, COUNT(BALL) as TOTAL_BALLS, COALESCE(SUM(CASE WHEN PLAYER_DISMISSED IS NOT NULL AND WICKET_TYPE IS NOT NULL THEN 1 ELSE 0 END), 0) as TOTAL_WICKETS FROM RAW_DELIVERIES WHERE STRIKER = %s AND BOWLER = %s"
     df_h2h = pd.read_sql(h2h_query, ctx, params=(batter, bowler)).iloc[0]
 
-    bat_query = "SELECT COALESCE(SUM(RUNS_OFF_BAT), 0) as RUNS, COUNT(BALL) as BALLS, COUNT(DISTINCT MATCH_ID) as TOTAL_INNINGS, COALESCE(SUM(CASE WHEN PLAYER_DISMISSED = %s AND WICKET_TYPE IS NOT NULL THEN 1 ELSE 0 END), 0) as TOTAL_DISMISSALS FROM RAW_DELIVERIES WHERE STRIKER = %s"
+    bat_query = "SELECT COALESCE(SUM(RUNS_OFF_BAT), 0)/2 as RUNS, COUNT(BALL)/2 as BALLS, COUNT(DISTINCT MATCH_ID) as TOTAL_INNINGS, COALESCE(SUM(CASE WHEN PLAYER_DISMISSED = %s AND WICKET_TYPE IS NOT NULL THEN 1 ELSE 0 END), 0)/2 as TOTAL_DISMISSALS FROM RAW_DELIVERIES WHERE STRIKER = %s"
     df_bat = pd.read_sql(bat_query, ctx, params=(batter, batter)).iloc[0]
 
-    bowl_query = "SELECT COALESCE(SUM(RUNS_OFF_BAT), 0) as RUNS_CONCEDED, COUNT(BALL) as BALLS_BOWLED, COALESCE(SUM(CASE WHEN PLAYER_DISMISSED IS NOT NULL AND WICKET_TYPE IS NOT NULL THEN 1 ELSE 0 END), 0) as WICKETS_TAKEN FROM RAW_DELIVERIES WHERE BOWLER = %s"
+    bowl_query = "SELECT COALESCE(SUM(RUNS_OFF_BAT), 0)/2 as RUNS_CONCEDED, COUNT(BALL)/2 as BALLS_BOWLED, COALESCE(SUM(CASE WHEN PLAYER_DISMISSED IS NOT NULL AND WICKET_TYPE IS NOT NULL THEN 1 ELSE 0 END), 0)/2 as WICKETS_TAKEN FROM RAW_DELIVERIES WHERE BOWLER = %s"
     df_bowl = pd.read_sql(bowl_query, ctx, params=(bowler,)).iloc[0]
     ctx.close()
     return df_h2h, df_bat, df_bowl
