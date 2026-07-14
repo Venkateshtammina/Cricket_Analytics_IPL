@@ -44,6 +44,8 @@ st.markdown("""
         --wicket-dim: rgba(255, 61, 113, 0.15);
         --shadow-card: 0 4px 10px rgba(0,0,0,0.3);
         --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.45);
+        --amber: #FFAB00;
+        --amber-dim: rgba(255, 171, 0, 0.15);
     }
 
     html, body, .stApp {
@@ -207,6 +209,7 @@ st.markdown("""
     .stat-card.tone-floodlight { border-left-color: var(--floodlight); }
     .stat-card.tone-boundary   { border-left-color: var(--boundary); }
     .stat-card.tone-wicket     { border-left-color: var(--wicket); }
+    .stat-card.tone-amber      { border-left-color: var(--amber); }
 
     .stat-card-head {
         display: flex;
@@ -230,6 +233,8 @@ st.markdown("""
     }
     .stat-card.tone-floodlight .stat-card-badge { background: var(--floodlight-dim); }
     .stat-card.tone-wicket .stat-card-badge { background: var(--wicket-dim); }
+    .stat-card.tone-amber .stat-card-badge { background: var(--amber-dim); }
+    
     .stat-card-value {
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
@@ -592,6 +597,23 @@ else:
                         <p class="stat-card-foot">Econ <b>{bw_econ:.2f}</b> &nbsp;·&nbsp; Avg <b>{avg_str}</b> &nbsp;·&nbsp; Balls <b>{int(bowl_p['BALLS_BOWLED'])}</b></p>
                     </div>
                 """, unsafe_allow_html=True)
+
+            # Restored Head-to-Head Statistics Panel Block
+            h2h_runs = int(h2h['TOTAL_RUNS'])/2
+            h2h_balls = int(h2h['TOTAL_BALLS'])/2
+            h2h_wickets = int(h2h['TOTAL_WICKETS'])/2
+            h2h_sr = (h2h_runs / h2h_balls) * 100 if h2h_balls > 0 else 0.0
+
+            st.markdown(f"""
+                <div class="stat-card tone-amber">
+                    <div class="stat-card-head">
+                        <span class="stat-card-title">Head-to-Head History · {sim_batter} vs {sim_bowler}</span>
+                        <span class="stat-card-badge">⚔️</span>
+                    </div>
+                    <p class="stat-card-value stat-mono">{h2h_runs} <span style="font-size:14px;color:var(--text-muted);">runs off</span> {h2h_balls} <span style="font-size:14px;color:var(--text-muted);">balls</span></p>
+                    <p class="stat-card-foot">Matchup Dismissals <b>{h2h_wickets}</b> &nbsp;·&nbsp; Matchup SR <b>{h2h_sr:.1f}</b></p>
+                </div>
+            """, unsafe_allow_html=True)
 
             total_balls_bowled = int(overs_completed) * 6 + int((overs_completed - int(overs_completed)) * 10)
             balls_remaining = max(120 - total_balls_bowled, 0)
