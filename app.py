@@ -17,82 +17,279 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Deep-Tech Elite Sports UI Styling Framework Injected Globally
+# ---------------------------------------------------------------------------
+# Design tokens: "floodlight night match" — a broadcast-graphics dark theme
+# built around a deep navy-black pitch, a cool "floodlight" blue for primary
+# data, an electric lime for positive/boundary events, and a signal-red for
+# dismissal risk. Numbers render in a monospace face like a scoreboard.
+# ---------------------------------------------------------------------------
 st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-    /* Global Background and Canvas Setup */
-    .stApp { background-color: #080A0F; color: #F3F4F6; font-family: 'Inter', sans-serif; }
-    
-    /* Sidebar Overhaul */
-    div[data-testid="stSidebar"] { background-color: #0D111A; border-right: 1px solid #1E293B; }
-    
-    /* Premium Glassmorphic Matchup Layout Cards */
-    .metric-card-neutral {
-        background: linear-gradient(135deg, #111625 0%, #0F1320 100%);
-        padding: 24px;
+    :root {
+        --bg-canvas: #05070C;
+        --bg-panel: #0C1018;
+        --bg-panel-2: #10151F;
+        --border-hair: #1C2433;
+        --border-hair-soft: #161C29;
+        --text-primary: #F4F6FA;
+        --text-secondary: #8A93A6;
+        --text-muted: #5B6479;
+        --floodlight: #4FC3F7;
+        --floodlight-dim: rgba(79, 195, 247, 0.12);
+        --boundary: #A6E22E;
+        --boundary-dim: rgba(166, 226, 46, 0.12);
+        --wicket: #FF5C7A;
+        --wicket-dim: rgba(255, 92, 122, 0.12);
+        --amber: #FBBF77;
+    }
+
+    html, body, .stApp {
+        background: radial-gradient(ellipse 1200px 600px at 50% -10%, #0B1220 0%, var(--bg-canvas) 55%);
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Numeric / scoreboard figures */
+    .stat-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ---------- Sidebar ---------- */
+    div[data-testid="stSidebar"] {
+        background-color: var(--bg-panel);
+        border-right: 1px solid var(--border-hair);
+    }
+
+    /* ---------- Hero header ---------- */
+    .hero-wrap {
+        position: relative;
+        padding: 6px 0 18px 0;
+        margin-bottom: 4px;
+    }
+    .hero-glow {
+        position: absolute;
+        top: -140px; left: 50%;
+        transform: translateX(-50%);
+        width: 640px; height: 320px;
+        background: radial-gradient(ellipse at center, rgba(79,195,247,0.18) 0%, rgba(79,195,247,0) 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 34px;
+        letter-spacing: -0.02em;
+        color: #FFFFFF;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .hero-sub {
+        color: var(--text-secondary);
+        font-size: 14px;
+        margin: 6px 0 0 0;
+        letter-spacing: 0.01em;
+    }
+    .live-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: var(--wicket);
+        background: var(--wicket-dim);
+        border: 1px solid rgba(255,92,122,0.35);
+        padding: 5px 10px 5px 8px;
+        border-radius: 999px;
+    }
+    .live-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: var(--wicket);
+        box-shadow: 0 0 0 0 rgba(255,92,122,0.6);
+        animation: pulse-dot 1.8s infinite;
+    }
+    @keyframes pulse-dot {
+        0%   { box-shadow: 0 0 0 0 rgba(255,92,122,0.55); }
+        70%  { box-shadow: 0 0 0 7px rgba(255,92,122,0); }
+        100% { box-shadow: 0 0 0 0 rgba(255,92,122,0); }
+    }
+    .hr-fade {
+        height: 1px;
+        border: none;
+        margin: 18px 0 22px 0;
+        background: linear-gradient(90deg, var(--border-hair) 0%, var(--border-hair-soft) 60%, transparent 100%);
+    }
+
+    /* ---------- Section labels ---------- */
+    .section-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin: 4px 0 14px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .section-label .tick { width: 3px; height: 14px; border-radius: 2px; background: var(--floodlight); display: inline-block; }
+
+    /* ---------- Config panel ---------- */
+    .config-panel {
+        background: var(--bg-panel);
+        border: 1px solid var(--border-hair);
+        border-radius: 16px;
+        padding: 20px 20px 8px 20px;
+    }
+
+    /* ---------- Metric cards ---------- */
+    .stat-card {
+        background: var(--bg-panel-2);
+        border: 1px solid var(--border-hair);
         border-radius: 14px;
-        border: 1px solid #1E293B;
-        border-top: 4px solid #38BDF8;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        margin-bottom: 20px;
+        padding: 18px 20px;
+        margin-bottom: 16px;
+        transition: border-color 0.2s ease, transform 0.2s ease;
     }
-    .metric-card-success {
-        background: linear-gradient(135deg, #111625 0%, #0F1320 100%);
-        padding: 24px;
+    .stat-card:hover { transform: translateY(-1px); }
+    .stat-card.tone-floodlight { border-left: 3px solid var(--floodlight); }
+    .stat-card.tone-boundary   { border-left: 3px solid var(--boundary); }
+    .stat-card.tone-wicket     { border-left: 3px solid var(--wicket); }
+
+    .stat-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+    }
+    .stat-card-title {
+        font-size: 12.5px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+    .stat-card-badge {
+        font-size: 10.5px;
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--text-muted);
+        border: 1px solid var(--border-hair);
+        padding: 2px 7px;
+        border-radius: 6px;
+    }
+    .stat-card-value {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 26px;
+        color: #FFFFFF;
+        margin: 2px 0 6px 0;
+    }
+    .stat-card-foot {
+        font-size: 12.5px;
+        color: var(--text-muted);
+        letter-spacing: 0.01em;
+    }
+    .stat-card-foot b { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+    /* Forecast tiles */
+    .forecast-tile {
+        background: var(--bg-panel-2);
+        border: 1px solid var(--border-hair);
         border-radius: 14px;
-        border: 1px solid #1E293B;
-        border-top: 4px solid #10B981;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        margin-bottom: 20px;
+        padding: 16px 18px;
+        text-align: left;
     }
-    .metric-card-alert {
-        background: linear-gradient(135deg, #111625 0%, #0F1320 100%);
-        padding: 24px;
-        border-radius: 14px;
-        border: 1px solid #1E293B;
-        border-top: 4px solid #EF4444;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        margin-bottom: 20px;
+    .forecast-tile .flabel { font-size: 12px; color: var(--text-secondary); letter-spacing: 0.02em; }
+    .forecast-tile .fvalue {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        font-size: 22px;
+        margin-top: 6px;
     }
-    
-    /* Sub-text variables formatting */
-    .sub-metric-text {
-        margin: 8px 0 0 0; 
-        font-size: 13px; 
-        color: #9CA3AF;
-        letter-spacing: 0.3px;
+    .forecast-tile.f-neutral .fvalue { color: var(--floodlight); }
+    .forecast-tile.f-boundary .fvalue { color: var(--boundary); }
+    .forecast-tile.f-wicket .fvalue { color: var(--wicket); }
+    .forecast-tile.f-neutral  { border-top: 3px solid var(--floodlight); }
+    .forecast-tile.f-boundary { border-top: 3px solid var(--boundary); }
+    .forecast-tile.f-wicket   { border-top: 3px solid var(--wicket); }
+
+    /* ---------- Win probability bar ---------- */
+    .wp-wrap { margin-top: 4px; margin-bottom: 22px; }
+    .wp-labels { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+    .wp-labels .chasing { color: var(--boundary); font-weight: 600; }
+    .wp-labels .defending { color: var(--wicket); font-weight: 600; }
+    .wp-labels .val { font-family: 'JetBrains Mono', monospace; }
+    .wp-track {
+        position: relative;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--wicket-dim);
+        border: 1px solid var(--border-hair);
+        overflow: hidden;
     }
-    .sub-metric-text b { color: #E5E7EB; }
-    
-    /* Streamlit Input Component Overrides for Dark Mode Symmetry */
-    div[data-testid="stNumberInput"] input, div[data-testid="stSelectbox"] div {
-        background-color: #111625 !important;
-        color: #F3F4F6 !important;
-        border: 1px solid #1E293B !important;
+    .wp-fill {
+        position: absolute; left: 0; top: 0; bottom: 0;
+        background: linear-gradient(90deg, #7BC943 0%, var(--boundary) 100%);
+        border-radius: 999px;
+    }
+
+    /* ---------- Streamlit input overrides ---------- */
+    div[data-testid="stNumberInput"] input,
+    div[data-testid="stSelectbox"] div,
+    div[data-testid="stSlider"] { color: var(--text-primary); }
+    div[data-testid="stNumberInput"] input {
+        background-color: var(--bg-panel-2) !important;
+        border: 1px solid var(--border-hair) !important;
         border-radius: 8px !important;
     }
-    
-    /* Typography Overrides */
-    h1, h2, h3 { font-weight: 700; letter-spacing: -0.03em; color: #FFFFFF !important; }
-    
-    /* Tab Component Styling */
-    .stTabs [data-baseweb="tab-list"] { gap: 12px; background-color: transparent; border-bottom: 2px solid #1E293B; }
+    div[data-testid="stSelectbox"] > div > div {
+        background-color: var(--bg-panel-2) !important;
+        border: 1px solid var(--border-hair) !important;
+        border-radius: 8px !important;
+    }
+    label[data-testid="stWidgetLabel"] p {
+        font-size: 12.5px !important;
+        color: var(--text-secondary) !important;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+
+    /* ---------- Dataframe ---------- */
+    div[data-testid="stDataFrame"] { border: 1px solid var(--border-hair); border-radius: 12px; overflow: hidden; }
+
+    /* ---------- Typography ---------- */
+    h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.02em; color: #FFFFFF !important; }
+
+    /* ---------- Tabs ---------- */
+    .stTabs [data-baseweb="tab-list"] { gap: 10px; background-color: transparent; border-bottom: 1px solid var(--border-hair); }
     .stTabs [data-baseweb="tab"] {
-        background-color: #111625;
-        color: #9CA3AF;
+        background-color: var(--bg-panel);
+        color: var(--text-secondary);
         border-radius: 8px 8px 0 0;
-        padding: 12px 24px;
-        border: 1px solid #1E293B;
+        padding: 11px 22px;
+        border: 1px solid var(--border-hair);
         border-bottom: none;
-        font-size: 14px;
-        transition: all 0.3s ease;
+        font-size: 13.5px;
+        font-weight: 500;
+        transition: all 0.2s ease;
     }
-    .stTabs [aria-selected="true"] { 
-        background-color: #38BDF8 !important; 
-        color: #080A0F !important; 
-        font-weight: 700 !important; 
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    .stTabs [aria-selected="true"] {
+        background-color: var(--floodlight) !important;
+        color: #06101A !important;
+        font-weight: 700 !important;
+        box-shadow: 0 0 18px rgba(79, 195, 247, 0.35);
     }
+
+    /* ---------- Alerts ---------- */
+    div[data-testid="stAlert"] { border-radius: 12px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -112,8 +309,8 @@ def get_snowflake_connection():
                 schema=st.secrets["SF_SCHEMA"]
             )
     except Exception:
-        pass 
-        
+        pass
+
     return snowflake.connector.connect(
         user=os.getenv("SF_USER"),
         password=os.getenv("SF_PASSWORD"),
@@ -133,40 +330,40 @@ def load_ml_objects():
         return model, encoders
     return None, None
 
-@st.cache_data(ttl=7200) 
+@st.cache_data(ttl=7200)
 def get_team_rosters():
     ctx = get_snowflake_connection()
     recent_matches_query = "SELECT DISTINCT MATCH_ID FROM RAW_DELIVERIES ORDER BY MATCH_ID DESC LIMIT 25"
     recent_matches = pd.read_sql(recent_matches_query, ctx)['MATCH_ID'].tolist()
     match_id_string = ','.join(map(str, recent_matches))
-    
+
     batting_query = f"SELECT DISTINCT BATTING_TEAM as TEAM, STRIKER as PLAYER FROM RAW_DELIVERIES WHERE MATCH_ID IN ({match_id_string})"
     bowling_query = f"SELECT DISTINCT BOWLING_TEAM as TEAM, BOWLER as PLAYER FROM RAW_DELIVERIES WHERE MATCH_ID IN ({match_id_string})"
-        
+
     df_batters = pd.read_sql(batting_query, ctx)
     df_batters['ROLE'] = 'batter'
     df_bowlers = pd.read_sql(bowling_query, ctx)
     df_bowlers['ROLE'] = 'bowler'
-    
+
     df_rosters = pd.concat([df_batters, df_bowlers], ignore_index=True)
     ctx.close()
     return df_rosters
 
-@st.cache_data(ttl=7200) 
+@st.cache_data(ttl=7200)
 def get_detailed_stats(batter, bowler):
     ctx = get_snowflake_connection()
     h2h_query = "SELECT COALESCE(SUM(RUNS_OFF_BAT), 0) as TOTAL_RUNS, COUNT(BALL) as TOTAL_BALLS, COALESCE(SUM(CASE WHEN PLAYER_DISMISSED IS NOT NULL AND WICKET_TYPE IS NOT NULL THEN 1 ELSE 0 END), 0) as TOTAL_WICKETS FROM RAW_DELIVERIES WHERE STRIKER = %s AND BOWLER = %s"
     df_h2h = pd.read_sql(h2h_query, ctx, params=(batter, bowler)).iloc[0]
-    
+
     bat_query = "SELECT COALESCE(SUM(RUNS_OFF_BAT), 0) as RUNS, COUNT(BALL) as BALLS, COUNT(DISTINCT MATCH_ID) as TOTAL_INNINGS, COALESCE(SUM(CASE WHEN PLAYER_DISMISSED = %s AND WICKET_TYPE IS NOT NULL THEN 1 ELSE 0 END), 0) as TOTAL_DISMISSALS FROM RAW_DELIVERIES WHERE STRIKER = %s"
     df_bat = pd.read_sql(bat_query, ctx, params=(batter, batter)).iloc[0]
-    
+
     bowl_query = "SELECT COALESCE(SUM(RUNS_OFF_BAT), 0) as RUNS_CONCEDED, COUNT(BALL) as BALLS_BOWLED, COALESCE(SUM(CASE WHEN PLAYER_DISMISSED IS NOT NULL AND WICKET_TYPE IS NOT NULL THEN 1 ELSE 0 END), 0) as WICKETS_TAKEN FROM RAW_DELIVERIES WHERE BOWLER = %s"
     df_bowl = pd.read_sql(bowl_query, ctx, params=(bowler,)).iloc[0]
     ctx.close()
     return df_h2h, df_bat, df_bowl
 
-@st.cache_data(ttl=7200) 
+@st.cache_data(ttl=7200)
 def fetch_knn_candidate_pool(balls_left):
     ctx = get_snowflake_connection()
     query = """
@@ -183,10 +380,10 @@ def calculate_historical_win_percentage(balls_left, wickets_lost, current_score,
     if runs_needed <= 0: return 100.0
     if balls_left <= 0: return 0.0
     if wickets_lost >= 10: return 0.0
-    
+
     req_run_rate = (runs_needed / balls_left) * 6
     df_features = fetch_knn_candidate_pool(balls_left)
-    
+
     if df_features.empty:
         base_prob = 50.0 + ((10 - wickets_lost) * 4.5) - (req_run_rate * 4.0) + (balls_left * 0.1)
         return max(min(base_prob, 95.0), 5.0)
@@ -194,14 +391,14 @@ def calculate_historical_win_percentage(balls_left, wickets_lost, current_score,
     b_remain_max = df_features['BALLS_REMAINING'].max() or 1
     runs_need_max = df_features['RUNS_NEEDED'].max() or 1
     rrr_max = df_features['REQUIRED_RUN_RATE'].max() or 1
-    
+
     df_features['dist'] = np.sqrt(
         ((df_features['BALLS_REMAINING']/b_remain_max - balls_left/b_remain_max) * 1.0) ** 2 +
         ((df_features['RUNS_NEEDED']/runs_need_max - runs_needed/runs_need_max) * 1.5) ** 2 +
-        ((df_features['CURRENT_WICKETS_LOST']/10.0 - wickets_lost/10.0) * 3.5) ** 2 + 
+        ((df_features['CURRENT_WICKETS_LOST']/10.0 - wickets_lost/10.0) * 3.5) ** 2 +
         ((df_features['REQUIRED_RUN_RATE']/rrr_max - req_run_rate/rrr_max) * 2.0) ** 2
     )
-    
+
     k_neighbors = df_features.nsmallest(120, 'dist')
     calibrated_pct = (k_neighbors['CHASE_WON'].mean() * 100) * ((10 - wickets_lost) / 10.0) ** 0.45
     return max(min(calibrated_pct, 98.0), 2.0)
@@ -216,94 +413,133 @@ else:
     all_batters_global = sorted(df_rosters[df_rosters['ROLE'] == 'batter']['PLAYER'].unique())
     all_bowlers_global = sorted(df_rosters[df_rosters['ROLE'] == 'bowler']['PLAYER'].unique())
     all_teams = sorted(df_rosters['TEAM'].unique())
-    
-    st.title("⚡ IPL STRATEGY ENGINE")
-    st.markdown("<p style='color:#6B7280; font-size: 15px; margin-top:-15px;'>Enterprise Smart Predictive Operations Center</p>", unsafe_allow_html=True)
-    st.markdown("---")
-    
-    tab1, tab2 = st.tabs(["📊 Live Simulation Deck", "🛡️ Franchise Matchup Matrix Board"])
-    
+
+    st.markdown("""
+        <div class="hero-wrap">
+            <div class="hero-glow"></div>
+            <div class="hero-content">
+                <p class="hero-title">🏏 IPL Strategy Engine
+                    <span class="live-pill"><span class="live-dot"></span>LIVE MODEL</span>
+                </p>
+                <p class="hero-sub">Enterprise-grade predictive operations center for ball-by-ball matchup intelligence</p>
+            </div>
+        </div>
+        <hr class="hr-fade" />
+    """, unsafe_allow_html=True)
+
+    tab1, tab2 = st.tabs(["📊  Live Simulation Deck", "🛡️  Franchise Matchup Matrix"])
+
     with tab1:
         c_setup1, c_setup2 = st.columns([1, 2], gap="large")
         with c_setup1:
-            st.markdown("### 🎛️ Match Parameters")
+            st.markdown('<p class="section-label"><span class="tick"></span>Match Parameters</p>', unsafe_allow_html=True)
+            st.markdown('<div class="config-panel">', unsafe_allow_html=True)
             sim_batter = st.selectbox("Active Striker", all_batters_global, index=0)
             sim_bowler = st.selectbox("Active Bowler", all_bowlers_global, index=0)
             current_score = st.number_input("Current Runs Scored", min_value=0, value=120)
             wickets_down = st.slider("Wickets Lost", 0, 9, 3)
             overs_completed = st.slider("Overs Completed", 0.0, 19.5, 15.0, 0.1)
             target_to_chase = st.number_input("Target to Chase", min_value=0, value=160)
-            
+            st.markdown('</div>', unsafe_allow_html=True)
+
         with c_setup2:
-            st.markdown("### 📈 Live In-Game Metrics")
+            st.markdown('<p class="section-label"><span class="tick"></span>Live In-Game Metrics</p>', unsafe_allow_html=True)
             h2h, bat_p, bowl_p = get_detailed_stats(sim_batter, sim_bowler)
-            
+
             k_prof1, k_prof2 = st.columns(2)
             with k_prof1:
                 b_sr = (bat_p['RUNS'] / bat_p['BALLS']) * 100 if bat_p['BALLS'] > 0 else 0
                 b_avg = bat_p['RUNS'] / int(bat_p['TOTAL_DISMISSALS']) if int(bat_p['TOTAL_DISMISSALS']) > 0 else bat_p['RUNS'] / max(int(bat_p['TOTAL_INNINGS']), 1)
-                st.markdown(f"<div class='metric-card-neutral'><h5>{sim_batter} (Career)</h5><h2>{int(bat_p['RUNS'])} Runs</h2><p class='sub-metric-text'><b>Avg:</b> {b_avg:.2f} &nbsp;|&nbsp; <b>SR:</b> {b_sr:.1f} &nbsp;|&nbsp; <b>Inn:</b> {int(bat_p['TOTAL_INNINGS'])}</p></div>", unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div class="stat-card tone-floodlight">
+                        <div class="stat-card-head">
+                            <span class="stat-card-title">{sim_batter} · Career</span>
+                            <span class="stat-card-badge">BAT</span>
+                        </div>
+                        <p class="stat-card-value stat-mono">{int(bat_p['RUNS'])} <span style="font-size:14px;color:var(--text-muted);">runs</span></p>
+                        <p class="stat-card-foot">Avg <b>{b_avg:.2f}</b> &nbsp;·&nbsp; SR <b>{b_sr:.1f}</b> &nbsp;·&nbsp; Inn <b>{int(bat_p['TOTAL_INNINGS'])}</b></p>
+                    </div>
+                """, unsafe_allow_html=True)
             with k_prof2:
                 bw_econ = (bowl_p['RUNS_CONCEDED'] / bowl_p['BALLS_BOWLED']) * 6 if bowl_p['BALLS_BOWLED'] > 0 else 0
                 bw_wickets = int(bowl_p['WICKETS_TAKEN'])
                 bw_avg = bowl_p['RUNS_CONCEDED'] / bw_wickets if bw_wickets > 0 else np.nan
                 avg_str = f"{bw_avg:.2f}" if not np.isnan(bw_avg) else "N/A"
-                st.markdown(f"<div class='metric-card-alert'><h5>{sim_bowler} (Career)</h5><h2>{bw_wickets} Wickets</h2><p class='sub-metric-text'><b>Econ:</b> {bw_econ:.2f} &nbsp;|&nbsp; <b>Avg:</b> {avg_str} &nbsp;|&nbsp; <b>Balls:</b> {int(bowl_p['BALLS_BOWLED'])}</p></div>", unsafe_allow_html=True)
-            
+                st.markdown(f"""
+                    <div class="stat-card tone-wicket">
+                        <div class="stat-card-head">
+                            <span class="stat-card-title">{sim_bowler} · Career</span>
+                            <span class="stat-card-badge">BOWL</span>
+                        </div>
+                        <p class="stat-card-value stat-mono">{bw_wickets} <span style="font-size:14px;color:var(--text-muted);">wickets</span></p>
+                        <p class="stat-card-foot">Econ <b>{bw_econ:.2f}</b> &nbsp;·&nbsp; Avg <b>{avg_str}</b> &nbsp;·&nbsp; Balls <b>{int(bowl_p['BALLS_BOWLED'])}</b></p>
+                    </div>
+                """, unsafe_allow_html=True)
+
             total_balls_bowled = int(overs_completed) * 6 + int((overs_completed - int(overs_completed)) * 10)
             balls_remaining = max(120 - total_balls_bowled, 0)
             crr = (current_score / total_balls_bowled) * 6 if total_balls_bowled > 0 else 0.0
             rrr = ((target_to_chase - current_score) / balls_remaining) * 6 if target_to_chase > 0 and balls_remaining > 0 else 0.0
-            
-            st.markdown("### 🏁 Vector Live Win Probability")
+
+            st.markdown('<p class="section-label"><span class="tick"></span>Win Probability</p>', unsafe_allow_html=True)
             win_pct = calculate_historical_win_percentage(balls_remaining, wickets_down, current_score, target_to_chase)
-            
-            w_c1, w_c2 = st.columns(2)
-            with w_c1: st.metric("Chasing Team Chance", f"{win_pct:.1f}%")
-            with w_c2: st.metric("Defending Team Chance", f"{(100.0 - win_pct):.1f}%")
-            st.progress(win_pct / 100.0)
-            
+
+            st.markdown(f"""
+                <div class="wp-wrap">
+                    <div class="wp-labels">
+                        <span class="chasing">CHASING &nbsp;<span class="val">{win_pct:.1f}%</span></span>
+                        <span class="defending">DEFENDING &nbsp;<span class="val">{(100.0 - win_pct):.1f}%</span></span>
+                    </div>
+                    <div class="wp-track">
+                        <div class="wp-fill" style="width:{win_pct:.1f}%;"></div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+
             try:
                 bat_enc = encoders['striker'].transform([sim_batter])[0]
                 bow_enc = encoders['bowler'].transform([sim_bowler])[0]
                 v = np.array([[bat_enc, bow_enc, balls_remaining, wickets_down, crr, rrr]])
                 ml_p = model.predict_proba(v)[0]
-                
-                st.markdown("### 🔮 Next-Ball Event Forecast Vectors")
+
+                st.markdown('<p class="section-label"><span class="tick"></span>Next-Ball Event Forecast</p>', unsafe_allow_html=True)
                 pm1, pm2, pm3 = st.columns(3)
-                with pm1: st.markdown(f"<div class='metric-card-neutral'><h5>Single / Dot</h5><h3>{ml_p[0]*100:.1f}%</h3></div>", unsafe_allow_html=True)
-                with pm2: st.markdown(f"<div class='metric-card-success'><h5>Boundary</h5><h3>{ml_p[1]*100:.1f}%</h3></div>", unsafe_allow_html=True)
-                with pm3: st.markdown(f"<div class='metric-card-alert'><h5>Dismissal Risk</h5><h3>{ml_p[2]*100:.1f}%</h3></div>", unsafe_allow_html=True)
+                with pm1:
+                    st.markdown(f'<div class="forecast-tile f-neutral"><div class="flabel">Single / Dot</div><div class="fvalue">{ml_p[0]*100:.1f}%</div></div>', unsafe_allow_html=True)
+                with pm2:
+                    st.markdown(f'<div class="forecast-tile f-boundary"><div class="flabel">Boundary</div><div class="fvalue">{ml_p[1]*100:.1f}%</div></div>', unsafe_allow_html=True)
+                with pm3:
+                    st.markdown(f'<div class="forecast-tile f-wicket"><div class="flabel">Dismissal Risk</div><div class="fvalue">{ml_p[2]*100:.1f}%</div></div>', unsafe_allow_html=True)
             except Exception as ml_err:
                 st.error(f"⚠️ ML Prediction Error: {str(ml_err)}")
 
     with tab2:
-        st.header("Opposing Franchise Matchup Matrix Board")
+        st.markdown('<p class="section-label"><span class="tick"></span>Opposing Franchise Matchup Matrix</p>', unsafe_allow_html=True)
         t_col1, t_col2 = st.columns(2)
         with t_col1: my_team = st.selectbox("Your Analytics Context Franchise", all_teams, index=0)
         with t_col2: opposing_team = st.selectbox("Target Opponent Context", [t for t in all_teams if t != my_team], index=0)
-            
+
         available_batters = sorted(df_rosters[(df_rosters['TEAM'] == my_team) & (df_rosters['ROLE'] == 'batter')]['PLAYER'].unique())
         available_bowlers = sorted(df_rosters[(df_rosters['TEAM'] == opposing_team) & (df_rosters['ROLE'] == 'bowler')]['PLAYER'].unique())
-        
+
         p_col1, p_col2 = st.columns(2)
         with p_col1: batter_1 = st.selectbox("Franchise Batter A", available_batters, index=0)
         with p_col2: batter_2 = st.selectbox("Franchise Batter B", [b for b in available_batters if b != batter_1], index=min(1, len(available_batters)-1))
-            
-        st.markdown("---")
+
+        st.markdown('<hr class="hr-fade" />', unsafe_allow_html=True)
         analysis_records = []
         for bowler in available_bowlers:
             try:
                 h2h_1, _, bowl_prof = get_detailed_stats(batter_1, bowler)
                 b_enc = encoders['bowler'].transform([bowler])[0]
                 b1_enc = encoders['striker'].transform([batter_1])[0]
-                v1 = np.array([[b1_enc, b_enc, 30, 3, 7.5, 9.0]]) 
+                v1 = np.array([[b1_enc, b_enc, 30, 3, 7.5, 9.0]])
                 p1 = model.predict_proba(v1)[0]
-                
+
                 b2_enc = encoders['striker'].transform([batter_2])[0]
-                v2 = np.array([[b2_enc, b_enc, 30, 3, 7.5, 9.0]]) 
+                v2 = np.array([[b2_enc, b_enc, 30, 3, 7.5, 9.0]])
                 p2 = model.predict_proba(v2)[0]
-                
+
                 analysis_records.append({
                     "Active Opposing Bowler": bowler,
                     f"{batter_1} Wicket Danger %": round(p1[2] * 100, 1),
@@ -313,9 +549,9 @@ else:
                     "Total Wickets Taken": int(bowl_prof['WICKETS_TAKEN'])
                 })
             except Exception: continue
-                
+
         if analysis_records:
             df_analysis = pd.DataFrame(analysis_records).sort_values(by=f"{batter_1} Wicket Danger %", ascending=False).reset_index(drop=True)
             st.dataframe(df_analysis, use_container_width=True)
-            st.markdown("### 📈 Visual Matchup Threat Spectrum Mapping")
+            st.markdown('<p class="section-label"><span class="tick"></span>Visual Matchup Threat Spectrum</p>', unsafe_allow_html=True)
             st.bar_chart(df_analysis.set_index("Active Opposing Bowler")[[f"{batter_1} Wicket Danger %", f"{batter_1} Boundary Leak %"]])
