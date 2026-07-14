@@ -1,0 +1,10 @@
+# Ignore heavy raw data and local databases
+data/1_raw/
+data/2_processed/*.db
+
+# Ignore Python cache and environment artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+.env
