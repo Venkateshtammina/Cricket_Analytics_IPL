@@ -55,6 +55,15 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
 
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #123B85 0%, var(--floodlight) 45%, #4E8FE0 100%);
+        z-index: 999;
+    }
+
     /* Numeric / scoreboard figures */
     .stat-mono { font-family: 'JetBrains Mono', monospace; }
 
@@ -70,36 +79,65 @@ st.markdown("""
     /* ---------- Hero header ---------- */
     .hero-wrap {
         position: relative;
-        padding: 6px 0 18px 0;
-        margin-bottom: 4px;
+        background: #FFFFFF;
+        border: 1px solid var(--border-hair);
+        border-radius: 18px;
+        padding: 22px 28px;
+        margin-bottom: 26px;
+        box-shadow: var(--shadow-card);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        overflow: hidden;
     }
-    .hero-glow {
+    .hero-wrap::before {
+        content: "";
         position: absolute;
-        top: -120px; left: 50%;
-        transform: translateX(-50%);
-        width: 640px; height: 280px;
-        background: radial-gradient(ellipse at center, rgba(28,95,204,0.08) 0%, rgba(28,95,204,0) 70%);
+        top: 0; right: 0;
+        width: 340px; height: 100%;
+        background: radial-gradient(ellipse at top right, rgba(28,95,204,0.06) 0%, rgba(28,95,204,0) 70%);
         pointer-events: none;
-        z-index: 0;
     }
-    .hero-content { position: relative; z-index: 1; }
+    .hero-left { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+    .hero-badge {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        background: linear-gradient(145deg, #123B85 0%, var(--floodlight) 100%);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 6px 16px rgba(28,95,204,0.28);
+        flex-shrink: 0;
+    }
     .hero-title {
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
-        font-size: 32px;
-        letter-spacing: -0.02em;
+        font-size: 24px;
+        letter-spacing: -0.01em;
         color: var(--text-primary);
         margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        line-height: 1.25;
     }
     .hero-sub {
         color: var(--text-secondary);
-        font-size: 14px;
-        margin: 6px 0 0 0;
+        font-size: 13.5px;
+        margin: 3px 0 0 0;
         letter-spacing: 0.01em;
     }
+    .hero-right { display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; flex-shrink: 0; }
+    .session-chip {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        font-size: 11px;
+        color: var(--text-muted);
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        font-weight: 600;
+        padding-right: 14px;
+        border-right: 1px solid var(--border-hair);
+    }
+    .session-chip span { color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0; text-transform: none; margin-top: 2px; }
     .live-pill {
         display: inline-flex;
         align-items: center;
@@ -111,7 +149,7 @@ st.markdown("""
         color: var(--wicket);
         background: var(--wicket-dim);
         border: 1px solid rgba(211,58,58,0.22);
-        padding: 5px 10px 5px 8px;
+        padding: 6px 12px 6px 9px;
         border-radius: 999px;
     }
     .live-dot {
@@ -187,14 +225,14 @@ st.markdown("""
         text-transform: uppercase;
     }
     .stat-card-badge {
-        font-size: 10.5px;
-        font-family: 'JetBrains Mono', monospace;
-        color: var(--text-muted);
-        background: var(--bg-panel-3);
-        border: 1px solid var(--border-hair);
-        padding: 2px 7px;
-        border-radius: 6px;
+        width: 26px; height: 26px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px;
+        border-radius: 8px;
+        flex-shrink: 0;
     }
+    .stat-card.tone-floodlight .stat-card-badge { background: var(--floodlight-dim); }
+    .stat-card.tone-wicket .stat-card-badge { background: var(--wicket-dim); }
     .stat-card-value {
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
@@ -240,17 +278,27 @@ st.markdown("""
     .forecast-tile.f-wicket .fvalue   { color: var(--wicket); }
 
     /* ---------- Win probability bar ---------- */
-    .wp-wrap { margin-top: 4px; margin-bottom: 22px; }
-    .wp-labels { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
-    .wp-labels .chasing { color: var(--boundary); font-weight: 600; }
-    .wp-labels .defending { color: var(--wicket); font-weight: 600; }
-    .wp-labels .val { font-family: 'JetBrains Mono', monospace; }
+    .wp-wrap {
+        margin-top: 4px; margin-bottom: 22px;
+        background: #FFFFFF;
+        border: 1px solid var(--border-hair);
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: var(--shadow-card);
+    }
+    .wp-labels { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    .wp-labels .side { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
+    .wp-labels .dotmark { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .wp-labels .chasing { color: var(--boundary); }
+    .wp-labels .chasing .dotmark { background: var(--boundary); }
+    .wp-labels .defending { color: var(--wicket); }
+    .wp-labels .defending .dotmark { background: var(--wicket); }
+    .wp-labels .val { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--text-primary); margin-left: 6px; }
     .wp-track {
         position: relative;
-        height: 12px;
+        height: 10px;
         border-radius: 999px;
         background: var(--wicket-dim);
-        border: 1px solid var(--border-hair);
         overflow: hidden;
     }
     .wp-fill {
@@ -307,25 +355,34 @@ st.markdown("""
     /* ---------- Typography ---------- */
     h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--text-primary) !important; }
 
-    /* ---------- Tabs ---------- */
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; background-color: transparent; border-bottom: 1px solid var(--border-hair); }
-    .stTabs [data-baseweb="tab"] {
-        background-color: #FFFFFF;
-        color: var(--text-secondary);
-        border-radius: 8px 8px 0 0;
-        padding: 11px 22px;
+    /* ---------- Tabs (segmented control) ---------- */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
+        background-color: #EBEEF4;
         border: 1px solid var(--border-hair);
-        border-bottom: none;
+        border-radius: 12px;
+        padding: 4px;
+        width: fit-content;
+        margin-bottom: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: transparent;
+        color: var(--text-secondary);
+        border-radius: 9px;
+        padding: 9px 20px;
+        border: none;
         font-size: 13.5px;
         font-weight: 500;
         transition: all 0.2s ease;
     }
     .stTabs [aria-selected="true"] {
-        background-color: var(--floodlight) !important;
-        color: #FFFFFF !important;
-        font-weight: 700 !important;
-        box-shadow: 0 4px 14px rgba(28, 95, 204, 0.28);
+        background-color: #FFFFFF !important;
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        box-shadow: 0 1px 2px rgba(16,24,45,0.06), 0 2px 6px rgba(16,24,45,0.08);
     }
+    .stTabs [data-baseweb="tab-highlight"] { display: none; }
+    .stTabs [data-baseweb="tab-border"] { display: none; }
 
     /* ---------- Alerts ---------- */
     div[data-testid="stAlert"] { border-radius: 12px; }
@@ -455,15 +512,18 @@ else:
 
     st.markdown("""
         <div class="hero-wrap">
-            <div class="hero-glow"></div>
-            <div class="hero-content">
-                <p class="hero-title">🏏 IPL Strategy Engine
-                    <span class="live-pill"><span class="live-dot"></span>LIVE MODEL</span>
-                </p>
-                <p class="hero-sub">Enterprise-grade predictive operations center for ball-by-ball matchup intelligence</p>
+            <div class="hero-left">
+                <div class="hero-badge">🏏</div>
+                <div>
+                    <p class="hero-title">IPL Strategy Engine</p>
+                    <p class="hero-sub">Predictive operations center for ball-by-ball matchup intelligence</p>
+                </div>
+            </div>
+            <div class="hero-right">
+                <div class="session-chip">Model Build<span>v2.3-knn</span></div>
+                <span class="live-pill"><span class="live-dot"></span>LIVE MODEL</span>
             </div>
         </div>
-        <hr class="hr-fade" />
     """, unsafe_allow_html=True)
 
     tab1, tab2 = st.tabs(["📊  Live Simulation Deck", "🛡️  Franchise Matchup Matrix"])
@@ -493,7 +553,7 @@ else:
                     <div class="stat-card tone-floodlight">
                         <div class="stat-card-head">
                             <span class="stat-card-title">{sim_batter} · Career</span>
-                            <span class="stat-card-badge">BAT</span>
+                            <span class="stat-card-badge">🏏</span>
                         </div>
                         <p class="stat-card-value stat-mono">{int(bat_p['RUNS'])} <span style="font-size:14px;color:var(--text-muted);">runs</span></p>
                         <p class="stat-card-foot">Avg <b>{b_avg:.2f}</b> &nbsp;·&nbsp; SR <b>{b_sr:.1f}</b> &nbsp;·&nbsp; Inn <b>{int(bat_p['TOTAL_INNINGS'])}</b></p>
@@ -508,7 +568,7 @@ else:
                     <div class="stat-card tone-wicket">
                         <div class="stat-card-head">
                             <span class="stat-card-title">{sim_bowler} · Career</span>
-                            <span class="stat-card-badge">BOWL</span>
+                            <span class="stat-card-badge">🎯</span>
                         </div>
                         <p class="stat-card-value stat-mono">{bw_wickets} <span style="font-size:14px;color:var(--text-muted);">wickets</span></p>
                         <p class="stat-card-foot">Econ <b>{bw_econ:.2f}</b> &nbsp;·&nbsp; Avg <b>{avg_str}</b> &nbsp;·&nbsp; Balls <b>{int(bowl_p['BALLS_BOWLED'])}</b></p>
@@ -526,8 +586,8 @@ else:
             st.markdown(f"""
                 <div class="wp-wrap">
                     <div class="wp-labels">
-                        <span class="chasing">CHASING &nbsp;<span class="val">{win_pct:.1f}%</span></span>
-                        <span class="defending">DEFENDING &nbsp;<span class="val">{(100.0 - win_pct):.1f}%</span></span>
+                        <span class="side chasing"><span class="dotmark"></span>Chasing<span class="val">{win_pct:.1f}%</span></span>
+                        <span class="side defending">Defending<span class="val">{(100.0 - win_pct):.1f}%</span><span class="dotmark"></span></span>
                     </div>
                     <div class="wp-track">
                         <div class="wp-fill" style="width:{win_pct:.1f}%;"></div>
@@ -591,6 +651,19 @@ else:
 
         if analysis_records:
             df_analysis = pd.DataFrame(analysis_records).sort_values(by=f"{batter_1} Wicket Danger %", ascending=False).reset_index(drop=True)
-            st.dataframe(df_analysis, use_container_width=True)
+            danger_cols = [f"{batter_1} Wicket Danger %", f"{batter_2} Wicket Danger %"]
+            leak_cols = [f"{batter_1} Boundary Leak %", f"{batter_2} Boundary Leak %"]
+            try:
+                styled_df = (
+                    df_analysis.style
+                    .background_gradient(subset=danger_cols, cmap="Reds", vmin=0, vmax=60)
+                    .background_gradient(subset=leak_cols, cmap="Greens", vmin=0, vmax=30)
+                    .format({c: "{:.1f}%" for c in danger_cols + leak_cols})
+                    .set_properties(**{"font-family": "Inter, sans-serif", "font-size": "13px"})
+                )
+                st.dataframe(styled_df, use_container_width=True)
+            except ImportError:
+                # matplotlib not available for background_gradient — fall back to plain table
+                st.dataframe(df_analysis, use_container_width=True)
             st.markdown('<p class="section-label"><span class="tick"></span>Visual Matchup Threat Spectrum</p>', unsafe_allow_html=True)
             st.bar_chart(df_analysis.set_index("Active Opposing Bowler")[[f"{batter_1} Wicket Danger %", f"{batter_1} Boundary Leak %"]])
