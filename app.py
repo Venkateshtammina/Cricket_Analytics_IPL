@@ -18,37 +18,39 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# Design tokens: "floodlight night match" — a broadcast-graphics dark theme
-# built around a deep navy-black pitch, a cool "floodlight" blue for primary
-# data, an electric lime for positive/boundary events, and a signal-red for
-# dismissal risk. Numbers render in a monospace face like a scoreboard.
+# Design tokens: "analyst desk" — a clean, light, professional dashboard
+# theme. Soft neutral gray canvas, white cards with hairline borders and
+# quiet shadows, and a restrained professional palette (deep blue, forest
+# green, brick red) rather than neon broadcast colors. Numbers still render
+# in a monospace face for a data-desk feel, kept subtle rather than loud.
 # ---------------------------------------------------------------------------
 st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
     :root {
-        --bg-canvas: #161B24;
-        --bg-panel: #1D2330;
-        --bg-panel-2: #262E3E;
-        --bg-panel-3: #2E3749;
-        --border-hair: #3A4356;
-        --border-hair-soft: #2C3444;
-        --text-primary: #F7F8FB;
-        --text-secondary: #A6AFC4;
-        --text-muted: #747E93;
-        --floodlight: #5FD4FF;
-        --floodlight-dim: rgba(95, 212, 255, 0.14);
-        --boundary: #9BE85C;
-        --boundary-dim: rgba(155, 232, 92, 0.14);
-        --wicket: #FF7A93;
-        --wicket-dim: rgba(255, 122, 147, 0.14);
-        --amber: #FDC77D;
-        --shadow-card: 0 8px 24px rgba(0,0,0,0.28);
+        --bg-canvas: #F3F5F9;
+        --bg-panel: #FFFFFF;
+        --bg-panel-2: #FFFFFF;
+        --bg-panel-3: #F3F5F9;
+        --border-hair: #E1E5EE;
+        --border-hair-soft: #ECEFF5;
+        --text-primary: #10192E;
+        --text-secondary: #5C6579;
+        --text-muted: #8A93A6;
+        --floodlight: #1C5FCC;
+        --floodlight-dim: rgba(28, 95, 204, 0.08);
+        --boundary: #178A4C;
+        --boundary-dim: rgba(23, 138, 76, 0.08);
+        --wicket: #D33A3A;
+        --wicket-dim: rgba(211, 58, 58, 0.07);
+        --amber: #B4690E;
+        --shadow-card: 0 1px 2px rgba(16,24,45,0.04), 0 6px 16px rgba(16,24,45,0.06);
+        --shadow-card-hover: 0 4px 8px rgba(16,24,45,0.05), 0 12px 24px rgba(16,24,45,0.09);
     }
 
     html, body, .stApp {
-        background: radial-gradient(ellipse 1300px 650px at 50% -8%, #232B3D 0%, var(--bg-canvas) 55%);
+        background: var(--bg-canvas);
         color: var(--text-primary);
         font-family: 'Inter', sans-serif;
     }
@@ -58,7 +60,7 @@ st.markdown("""
 
     /* ---------- Sidebar ---------- */
     div[data-testid="stSidebar"] {
-        background-color: var(--bg-panel);
+        background-color: #FFFFFF;
         border-right: 1px solid var(--border-hair);
     }
 
@@ -73,10 +75,10 @@ st.markdown("""
     }
     .hero-glow {
         position: absolute;
-        top: -140px; left: 50%;
+        top: -120px; left: 50%;
         transform: translateX(-50%);
-        width: 640px; height: 320px;
-        background: radial-gradient(ellipse at center, rgba(95,212,255,0.22) 0%, rgba(95,212,255,0) 70%);
+        width: 640px; height: 280px;
+        background: radial-gradient(ellipse at center, rgba(28,95,204,0.08) 0%, rgba(28,95,204,0) 70%);
         pointer-events: none;
         z-index: 0;
     }
@@ -84,9 +86,9 @@ st.markdown("""
     .hero-title {
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
-        font-size: 34px;
+        font-size: 32px;
         letter-spacing: -0.02em;
-        color: #FFFFFF;
+        color: var(--text-primary);
         margin: 0;
         display: flex;
         align-items: center;
@@ -108,7 +110,7 @@ st.markdown("""
         letter-spacing: 0.08em;
         color: var(--wicket);
         background: var(--wicket-dim);
-        border: 1px solid rgba(255,92,122,0.35);
+        border: 1px solid rgba(211,58,58,0.22);
         padding: 5px 10px 5px 8px;
         border-radius: 999px;
     }
@@ -116,13 +118,13 @@ st.markdown("""
         width: 7px; height: 7px;
         border-radius: 50%;
         background: var(--wicket);
-        box-shadow: 0 0 0 0 rgba(255,92,122,0.6);
+        box-shadow: 0 0 0 0 rgba(211,58,58,0.45);
         animation: pulse-dot 1.8s infinite;
     }
     @keyframes pulse-dot {
-        0%   { box-shadow: 0 0 0 0 rgba(255,92,122,0.55); }
-        70%  { box-shadow: 0 0 0 7px rgba(255,92,122,0); }
-        100% { box-shadow: 0 0 0 0 rgba(255,92,122,0); }
+        0%   { box-shadow: 0 0 0 0 rgba(211,58,58,0.4); }
+        70%  { box-shadow: 0 0 0 7px rgba(211,58,58,0); }
+        100% { box-shadow: 0 0 0 0 rgba(211,58,58,0); }
     }
     .hr-fade {
         height: 1px;
@@ -148,7 +150,7 @@ st.markdown("""
 
     /* ---------- Config panel ---------- */
     .config-panel {
-        background: var(--bg-panel);
+        background: #FFFFFF;
         border: 1px solid var(--border-hair);
         border-radius: 16px;
         padding: 20px 20px 8px 20px;
@@ -157,7 +159,7 @@ st.markdown("""
 
     /* ---------- Metric cards ---------- */
     .stat-card {
-        background: var(--bg-panel-2);
+        background: #FFFFFF;
         border: 1px solid var(--border-hair);
         border-left-width: 3px;
         border-radius: 14px;
@@ -166,7 +168,7 @@ st.markdown("""
         box-shadow: var(--shadow-card);
         transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.34); }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card-hover); }
     .stat-card.tone-floodlight { border-left-color: var(--floodlight); }
     .stat-card.tone-boundary   { border-left-color: var(--boundary); }
     .stat-card.tone-wicket     { border-left-color: var(--wicket); }
@@ -179,7 +181,7 @@ st.markdown("""
     }
     .stat-card-title {
         font-size: 12.5px;
-        font-weight: 500;
+        font-weight: 600;
         color: var(--text-secondary);
         letter-spacing: 0.02em;
         text-transform: uppercase;
@@ -188,6 +190,7 @@ st.markdown("""
         font-size: 10.5px;
         font-family: 'JetBrains Mono', monospace;
         color: var(--text-muted);
+        background: var(--bg-panel-3);
         border: 1px solid var(--border-hair);
         padding: 2px 7px;
         border-radius: 6px;
@@ -196,7 +199,7 @@ st.markdown("""
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
         font-size: 26px;
-        color: #FFFFFF;
+        color: var(--text-primary);
         margin: 2px 0 6px 0;
     }
     .stat-card-foot {
@@ -208,7 +211,7 @@ st.markdown("""
 
     /* Forecast tiles */
     .forecast-tile {
-        background: var(--bg-panel-2);
+        background: #FFFFFF;
         border: 1px solid var(--border-hair);
         border-left-width: 3px;
         border-radius: 14px;
@@ -217,10 +220,10 @@ st.markdown("""
         box-shadow: var(--shadow-card);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .forecast-tile:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.34); }
+    .forecast-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-card-hover); }
     .forecast-tile .fhead { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
     .forecast-tile .fdot { width: 8px; height: 8px; border-radius: 50%; }
-    .forecast-tile .flabel { font-size: 12px; color: var(--text-secondary); letter-spacing: 0.02em; }
+    .forecast-tile .flabel { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.02em; }
     .forecast-tile .fvalue {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 600;
@@ -229,9 +232,9 @@ st.markdown("""
     .forecast-tile.f-neutral  { border-left-color: var(--floodlight); }
     .forecast-tile.f-boundary { border-left-color: var(--boundary); }
     .forecast-tile.f-wicket   { border-left-color: var(--wicket); }
-    .forecast-tile.f-neutral .fdot   { background: var(--floodlight); box-shadow: 0 0 10px rgba(95,212,255,0.55); }
-    .forecast-tile.f-boundary .fdot  { background: var(--boundary); box-shadow: 0 0 10px rgba(155,232,92,0.55); }
-    .forecast-tile.f-wicket .fdot    { background: var(--wicket); box-shadow: 0 0 10px rgba(255,122,147,0.55); }
+    .forecast-tile.f-neutral .fdot   { background: var(--floodlight); }
+    .forecast-tile.f-boundary .fdot  { background: var(--boundary); }
+    .forecast-tile.f-wicket .fdot    { background: var(--wicket); }
     .forecast-tile.f-neutral .fvalue  { color: var(--floodlight); }
     .forecast-tile.f-boundary .fvalue { color: var(--boundary); }
     .forecast-tile.f-wicket .fvalue   { color: var(--wicket); }
@@ -249,13 +252,11 @@ st.markdown("""
         background: var(--wicket-dim);
         border: 1px solid var(--border-hair);
         overflow: hidden;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
     }
     .wp-fill {
         position: absolute; left: 0; top: 0; bottom: 0;
-        background: linear-gradient(90deg, #7BD94A 0%, var(--boundary) 100%);
+        background: linear-gradient(90deg, #229356 0%, var(--boundary) 100%);
         border-radius: 999px;
-        box-shadow: 0 0 12px rgba(155,232,92,0.35);
     }
 
     /* ---------- Streamlit input overrides ---------- */
@@ -278,10 +279,11 @@ st.markdown("""
     }
     div[data-testid="stSelectbox"] > div > div:focus-within {
         border-color: var(--floodlight) !important;
+        box-shadow: 0 0 0 3px rgba(28,95,204,0.12) !important;
     }
     div[data-testid="stSlider"] [role="slider"] {
         background-color: var(--floodlight) !important;
-        box-shadow: 0 0 0 4px rgba(95,212,255,0.18) !important;
+        box-shadow: 0 0 0 4px rgba(28,95,204,0.14) !important;
     }
     div[data-testid="stSlider"] > div > div > div > div {
         background-color: var(--floodlight) !important;
@@ -291,19 +293,24 @@ st.markdown("""
         color: var(--text-secondary) !important;
         letter-spacing: 0.02em;
         text-transform: uppercase;
-        font-weight: 500;
+        font-weight: 600;
     }
 
     /* ---------- Dataframe ---------- */
-    div[data-testid="stDataFrame"] { border: 1px solid var(--border-hair); border-radius: 12px; overflow: hidden; }
+    div[data-testid="stDataFrame"] {
+        border: 1px solid var(--border-hair);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-card);
+    }
 
     /* ---------- Typography ---------- */
-    h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.02em; color: #FFFFFF !important; }
+    h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--text-primary) !important; }
 
     /* ---------- Tabs ---------- */
     .stTabs [data-baseweb="tab-list"] { gap: 10px; background-color: transparent; border-bottom: 1px solid var(--border-hair); }
     .stTabs [data-baseweb="tab"] {
-        background-color: var(--bg-panel-2);
+        background-color: #FFFFFF;
         color: var(--text-secondary);
         border-radius: 8px 8px 0 0;
         padding: 11px 22px;
@@ -315,9 +322,9 @@ st.markdown("""
     }
     .stTabs [aria-selected="true"] {
         background-color: var(--floodlight) !important;
-        color: #0A1926 !important;
+        color: #FFFFFF !important;
         font-weight: 700 !important;
-        box-shadow: 0 0 18px rgba(95, 212, 255, 0.4);
+        box-shadow: 0 4px 14px rgba(28, 95, 204, 0.28);
     }
 
     /* ---------- Alerts ---------- */
