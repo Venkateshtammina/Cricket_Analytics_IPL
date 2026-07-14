@@ -326,7 +326,7 @@ This project is intended for educational and analytical purposes.
 
 # 👨‍💻 Author
 
-**Venkatesh Tammina**
+
 
 Live:https://venkateshtammina-cricket-analytics-ipl-app-iiyn1q.streamlit.app/
 
