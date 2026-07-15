@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 import pickle
 import numpy as np
+import altair as alt
 from dotenv import load_dotenv
 
 # Initialize application configuration mapping
@@ -27,31 +28,36 @@ st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
     :root {
-        --bg-canvas: #21293B; /* Deep Dark Slate Canvas */
-        --bg-panel: #454545;  /* Sleek Dark Muted Panel Color */
-        --bg-panel-2: #2B354A; /* Elevated panel surface */
-        --bg-panel-3: #1F2736; /* Internal recessed surface for inputs */
-        --border-hair: #323D54; /* Muted slate border accents */
-        --border-hair-soft: #2E384C;
-        --text-primary: #FFFFFF; /* High-contrast white for headers */
-        --text-secondary: #C5CEE0; /* Soft silvery blue-gray for metadata */
-        --text-muted: #8F9BB3;
-        --floodlight: #3366FF;
-        --floodlight-dim: rgba(51, 102, 255, 0.15);
-        --boundary: #00E676;
-        --boundary-dim: rgba(0, 230, 118, 0.15);
-        --wicket: #FF3D71;
-        --wicket-dim: rgba(255, 61, 113, 0.15);
-        --shadow-card: 0 4px 10px rgba(0,0,0,0.3);
-        --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.45);
-        --amber: #FFAB00;
-        --amber-dim: rgba(255, 171, 0, 0.15);
+        --bg-canvas: #F3F7F2; /* Soft sage app canvas */
+        --bg-panel: rgba(251, 253, 248, 0.88);  /* Frosted warm panel */
+        --bg-panel-2: rgba(244, 248, 239, 0.94); /* Elevated soft surface */
+        --bg-panel-3: #FBFDF8; /* Input surface */
+        --border-hair: rgba(15, 23, 42, 0.10); /* Soft light border */
+        --border-hair-soft: rgba(15, 23, 42, 0.06);
+        --text-primary: #0F172A; /* Slate ink */
+        --text-secondary: #334155; /* Slate metadata */
+        --text-muted: #64748B;
+        --floodlight: #6D5DFB;
+        --floodlight-dim: rgba(109, 93, 251, 0.12);
+        --boundary: #0891B2;
+        --boundary-dim: rgba(8, 145, 178, 0.12);
+        --wicket: #F43F5E;
+        --wicket-dim: rgba(244, 63, 94, 0.12);
+        --shadow-card: 0 16px 42px rgba(15, 23, 42, 0.08);
+        --shadow-card-hover: 0 22px 60px rgba(15, 23, 42, 0.14);
+        --amber: #D97706;
+        --amber-dim: rgba(217, 119, 6, 0.12);
     }
 
     html, body, .stApp {
         background: var(--bg-canvas) !important;
         color: var(--text-primary);
         font-family: 'Inter', sans-serif;
+        --primary-color: #0F766E !important;
+        --primary-color-hover: #0E7490 !important;
+        --primary-color-active: #115E59 !important;
+        --secondary-background-color: #FBFDF8 !important;
+        --text-color: #0F172A !important;
     }
 
     .stApp::before {
@@ -59,8 +65,16 @@ st.markdown("""
         position: fixed;
         top: 0; left: 0; right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #102A43 0%, var(--floodlight) 45%, #62B7FC 100%);
+        background: linear-gradient(90deg, #22D3EE 0%, #7C3AED 48%, #FB7185 100%);
         z-index: 999;
+    }
+
+    .stApp {
+        background:
+            radial-gradient(circle at 14% 8%, rgba(109,93,251,0.16), transparent 30%),
+            radial-gradient(circle at 84% 10%, rgba(8,145,178,0.13), transparent 28%),
+            radial-gradient(circle at 74% 82%, rgba(244,63,94,0.08), transparent 32%),
+            linear-gradient(135deg, #FBFDF8 0%, var(--bg-canvas) 50%, #EAF4EC 100%) !important;
     }
 
     /* Numeric / scoreboard figures */
@@ -68,7 +82,7 @@ st.markdown("""
 
     /* ---------- Sidebar ---------- */
     div[data-testid="stSidebar"] {
-        background-color: var(--bg-panel);
+        background: linear-gradient(180deg, rgba(251,253,248,0.96), rgba(237,247,232,0.96));
         border-right: 1px solid var(--border-hair);
     }
 
@@ -78,7 +92,10 @@ st.markdown("""
     /* ---------- Hero header ---------- */
     .hero-wrap {
         position: relative;
-        background: var(--bg-panel);
+        background:
+            linear-gradient(135deg, rgba(251,253,248,0.95), rgba(235,247,239,0.90)),
+            radial-gradient(circle at 18% 18%, rgba(8,145,178,0.14), transparent 32%),
+            radial-gradient(circle at 82% 20%, rgba(109,93,251,0.20), transparent 38%);
         border: 1px solid var(--border-hair);
         border-radius: 18px;
         padding: 22px 28px;
@@ -95,17 +112,30 @@ st.markdown("""
         position: absolute;
         top: 0; right: 0;
         width: 340px; height: 100%;
-        background: radial-gradient(ellipse at top right, rgba(51, 102, 255, 0.1) 0%, rgba(51, 102, 255, 0) 70%);
+        background: radial-gradient(ellipse at top right, rgba(34, 211, 238, 0.16) 0%, rgba(34, 211, 238, 0) 70%);
+        pointer-events: none;
+    }
+    .hero-wrap::after {
+        content: "";
+        position: absolute;
+        inset: auto -40px -72px auto;
+        width: 260px;
+        height: 180px;
+        border-radius: 50%;
+        border: 1px solid rgba(109,93,251,0.14);
+        box-shadow: inset 0 0 45px rgba(109,93,251,0.16);
+        transform: rotate(-12deg);
         pointer-events: none;
     }
     .hero-left { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
     .hero-badge {
         width: 52px; height: 52px;
         border-radius: 14px;
-        background: linear-gradient(145deg, #102A43 0%, var(--floodlight) 100%);
+        background: linear-gradient(145deg, #22D3EE 0%, #7C3AED 100%);
         display: flex; align-items: center; justify-content: center;
         font-size: 24px;
-        box-shadow: 0 6px 16px rgba(51,102,255,0.3);
+        color: #FFFFFF;
+        box-shadow: 0 12px 30px rgba(109,93,251,0.22);
         flex-shrink: 0;
     }
     .hero-title {
@@ -145,23 +175,23 @@ st.markdown("""
         font-size: 11px;
         font-weight: 600;
         letter-spacing: 0.08em;
-        color: #FF3D71;
+        color: #FB7185;
         background: var(--wicket-dim);
-        border: 1px solid rgba(255,61,113,0.3);
+        border: 1px solid rgba(251,113,133,0.32);
         padding: 6px 12px 6px 9px;
         border-radius: 999px;
     }
     .live-dot {
         width: 7px; height: 7px;
         border-radius: 50%;
-        background: #FF3D71;
-        box-shadow: 0 0 0 0 rgba(255,61,113,0.45);
+        background: #FB7185;
+        box-shadow: 0 0 0 0 rgba(251,113,133,0.45);
         animation: pulse-dot 1.8s infinite;
     }
     @keyframes pulse-dot {
-        0%   { box-shadow: 0 0 0 0 rgba(255,61,113,0.4); }
-        70%  { box-shadow: 0 0 0 7px rgba(255,61,113,0); }
-        100% { box-shadow: 0 0 0 0 rgba(255,61,113,0); }
+        0%   { box-shadow: 0 0 0 0 rgba(251,113,133,0.4); }
+        70%  { box-shadow: 0 0 0 7px rgba(251,113,133,0); }
+        100% { box-shadow: 0 0 0 0 rgba(251,113,133,0); }
     }
     .hr-fade {
         height: 1px;
@@ -190,8 +220,40 @@ st.markdown("""
         background: var(--bg-panel);
         border: 1px solid var(--border-hair);
         border-radius: 16px;
-        padding: 20px 20px 8px 20px;
+        padding: 18px 18px 4px 18px;
         box-shadow: var(--shadow-card);
+    }
+    .config-panel [data-testid="stVerticalBlock"] {
+        gap: 0.65rem !important;
+    }
+
+    .mini-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+    .mini-kpi {
+        background: linear-gradient(145deg, rgba(255,255,255,0.92), rgba(248,250,252,0.92));
+        border: 1px solid var(--border-hair);
+        border-radius: 14px;
+        padding: 13px 14px;
+        box-shadow: var(--shadow-card);
+    }
+    .mini-kpi span {
+        display: block;
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+    }
+    .mini-kpi b {
+        display: block;
+        margin-top: 5px;
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--text-primary);
+        font-size: 18px;
     }
 
     /* ---------- Metric cards ---------- */
@@ -279,6 +341,15 @@ st.markdown("""
     .forecast-tile.f-boundary .fvalue { color: var(--boundary); }
     .forecast-tile.f-wicket .fvalue   { color: var(--wicket); }
 
+    .chart-shell {
+        background: var(--bg-panel);
+        border: 1px solid var(--border-hair);
+        border-radius: 16px;
+        padding: 16px;
+        margin: 6px 0 18px 0;
+        box-shadow: var(--shadow-card);
+    }
+
     /* ---------- Win probability bar ---------- */
     .wp-wrap {
         margin-top: 4px; margin-bottom: 22px;
@@ -305,70 +376,115 @@ st.markdown("""
     }
     .wp-fill {
         position: absolute; left: 0; top: 0; bottom: 0;
-        background: linear-gradient(90deg, #00E676 0%, var(--boundary) 100%);
+        background: linear-gradient(90deg, #22D3EE 0%, #A78BFA 52%, #FB7185 100%);
         border-radius: 999px;
     }
 
     /* ---------- Streamlit input overrides ---------- */
     div[data-testid="stNumberInput"] input,
-    div[data-testid="stSlider"] { color: #FFFFFF !important; font-weight: 500; }
+    div[data-testid="stSlider"] { color: var(--text-primary) !important; font-weight: 500; }
     
-    /* Force dynamic white text inside dark background selection controls */
+    /* Force readable text inside light selection controls */
     div[data-testid="stSelectbox"] * {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
+        color: var(--text-primary) !important;
+        -webkit-text-fill-color: var(--text-primary) !important;
     }
     
-    /* Tabs Overrides: Pure luminous white/light alignment for tab operations */
+    /* Tabs Overrides */
     .stTabs [data-baseweb="tab-list"] button,
     .stTabs [data-baseweb="tab-list"] button *,
     .stTabs [data-baseweb="tab"] p,
     .stTabs [data-baseweb="tab"] div,
     .stTabs [data-baseweb="tab"] span {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
+        color: var(--text-secondary) !important;
+        -webkit-text-fill-color: var(--text-secondary) !important;
         font-weight: 600 !important;
     }
 
     /* Popover menu options contrast alignments */
     div[data-baseweb="popover"] *,
     ul[role="listbox"] * {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
+        color: var(--text-primary) !important;
+        -webkit-text-fill-color: var(--text-primary) !important;
         background-color: var(--bg-panel-2) !important;
     }
 
     div[data-testid="stNumberInput"] input {
         background-color: var(--bg-panel-3) !important;
         border: 1px solid var(--border-hair) !important;
-        border-radius: 8px !important;
+        border-radius: 12px !important;
+        color: var(--text-primary) !important;
+        font-size: 14px !important;
+        min-height: 44px !important;
+        padding-right: 42px !important;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+    }
+    div[data-testid="stNumberInput"] > div {
+        position: relative !important;
+    }
+    div[data-testid="stNumberInput"] > div::after {
+        content: "+";
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #EAF8F3, #EAF2FF);
+        border: 1px solid rgba(44,191,174,0.20);
+        color: #0F766E;
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1;
+        pointer-events: none;
+        box-shadow: 0 6px 14px rgba(15,23,42,0.06);
+    }
+    div[data-testid="stNumberInput"] input:focus {
+        border-color: rgba(44,191,174,0.42) !important;
+        box-shadow: 0 0 0 4px rgba(44,191,174,0.12), 0 10px 26px rgba(15,23,42,0.06) !important;
     }
     div[data-testid="stNumberInput"] button {
-        background-color: var(--bg-panel-3) !important;
-        border: 1px solid var(--border-hair) !important;
+        display: none !important;
     }
     div[data-testid="stSelectbox"] > div > div {
         background-color: var(--bg-panel-3) !important;
         border: 1px solid var(--border-hair) !important;
-        border-radius: 8px !important;
+        border-radius: 12px !important;
+        min-height: 44px !important;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
     }
     div[data-testid="stSelectbox"] > div > div:focus-within {
         border-color: var(--floodlight) !important;
-        box-shadow: 0 0 0 3px rgba(51,102,255,0.2) !important;
+        box-shadow: 0 0 0 3px rgba(109,93,251,0.16) !important;
     }
     div[data-testid="stSlider"] [role="slider"] {
-        background-color: var(--floodlight) !important;
-        box-shadow: 0 0 0 4px rgba(51,102,255,0.25) !important;
+        background: linear-gradient(135deg, #0EA5E9, #6D5DFB) !important;
+        border: 2px solid #FBFDF8 !important;
+        box-shadow: 0 6px 16px rgba(109,93,251,0.24) !important;
     }
     div[data-testid="stSlider"] > div > div > div > div {
-        background-color: var(--floodlight) !important;
+        background: linear-gradient(90deg, #0EA5E9, #6D5DFB) !important;
+    }
+    div[data-testid="stSlider"] div[data-testid="stTickBar"] {
+        display: none !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div {
+        background-color: #E2E8F0 !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] {
+        padding-top: 0.45rem !important;
+        padding-bottom: 1rem !important;
     }
     label[data-testid="stWidgetLabel"] p {
-        font-size: 12.5px !important;
-        color: var(--text-secondary) !important;
+        font-size: 12px !important;
+        color: #1E293B !important;
         letter-spacing: 0.02em;
         text-transform: uppercase;
-        font-weight: 600;
+        font-weight: 700;
     }
 
     /* ---------- Dataframe ---------- */
@@ -385,27 +501,624 @@ st.markdown("""
     /* ---------- Tabs (segmented controls layout framework) ---------- */
     .stTabs [data-baseweb="tab-list"] {
         gap: 4px;
-        background-color: var(--bg-panel-2);
+        background: rgba(251, 253, 248, 0.82);
         border: 1px solid var(--border-hair);
         border-radius: 12px;
         padding: 4px;
         width: fit-content;
         margin-bottom: 8px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+    }
+    .stTabs [data-baseweb="tab-list"] button {
+        opacity: 1 !important;
     }
     .stTabs [data-baseweb="tab"] {
-        background-color: transparent;
+        background-color: rgba(251, 253, 248, 0.88) !important;
         border-radius: 9px;
         padding: 9px 20px;
-        border: none;
+        border: 1px solid rgba(15, 23, 42, 0.08) !important;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
         font-size: 13.5px;
         transition: all 0.2s ease;
     }
+    .stTabs [data-baseweb="tab"][aria-selected="false"] *,
+    .stTabs [data-baseweb="tab"][aria-selected="false"] p,
+    .stTabs [data-baseweb="tab"][aria-selected="false"] span,
+    .stTabs [data-baseweb="tab"][aria-selected="false"] div,
+    .stTabs button[aria-selected="false"] *,
+    .stTabs button[aria-selected="false"] p,
+    .stTabs button[aria-selected="false"] span,
+    .stTabs button[aria-selected="false"] div {
+        color: #1E293B !important;
+        -webkit-text-fill-color: #1E293B !important;
+        opacity: 1 !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: rgba(224, 242, 254, 0.95) !important;
+        border-color: rgba(14, 165, 233, 0.32) !important;
+        color: #075985 !important;
+        transform: translateY(-1px);
+    }
+    .stTabs [data-baseweb="tab"]:hover *,
+    .stTabs [data-baseweb="tab"]:hover p,
+    .stTabs [data-baseweb="tab"]:hover span,
+    .stTabs [data-baseweb="tab"]:hover div {
+        color: #075985 !important;
+        -webkit-text-fill-color: #075985 !important;
+    }
     .stTabs [aria-selected="true"] {
-        background-color: var(--floodlight) !important;
-        box-shadow: 0 2px 8px rgba(51,102,255,0.4);
+        background: linear-gradient(135deg, #0EA5E9 0%, #6D5DFB 100%) !important;
+        border-color: rgba(109, 93, 251, 0.48) !important;
+        border-bottom-color: rgba(109, 93, 251, 0.48) !important;
+        box-shadow: 0 10px 24px rgba(109, 93, 251, 0.26);
+    }
+    .stTabs button[aria-selected="true"] {
+        background: linear-gradient(135deg, #0EA5E9 0%, #6D5DFB 100%) !important;
+        border-color: rgba(109, 93, 251, 0.48) !important;
+        border-bottom-color: rgba(109, 93, 251, 0.48) !important;
+    }
+    .stTabs button[aria-selected="false"] {
+        background-color: rgba(251, 253, 248, 0.92) !important;
+        border-color: rgba(15, 23, 42, 0.08) !important;
+        border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+    }
+    .stTabs [aria-selected="true"]:hover {
+        background: linear-gradient(135deg, #0284C7 0%, #5B4BEA 100%) !important;
+        border-color: rgba(91, 75, 234, 0.55) !important;
+    }
+    .stTabs [aria-selected="true"] *,
+    .stTabs [aria-selected="true"] p,
+    .stTabs [aria-selected="true"] span,
+    .stTabs [aria-selected="true"] div,
+    .stTabs button[aria-selected="true"] *,
+    .stTabs button[aria-selected="true"] p,
+    .stTabs button[aria-selected="true"] span,
+    .stTabs button[aria-selected="true"] div {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        opacity: 1 !important;
     }
     .stTabs [data-baseweb="tab-highlight"] { display: none; }
     .stTabs [data-baseweb="tab-border"] { display: none; }
+
+    /* ---------- Final tab + slider color overrides ---------- */
+    .stTabs [data-baseweb="tab-list"] {
+        background: rgba(251, 253, 248, 0.86) !important;
+        border-color: rgba(15, 23, 42, 0.08) !important;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+    }
+    .stTabs button[aria-selected="false"],
+    .stTabs [data-baseweb="tab"][aria-selected="false"] {
+        background: rgba(251, 253, 248, 0.94) !important;
+        border-color: rgba(15, 23, 42, 0.08) !important;
+    }
+    .stTabs button[aria-selected="false"] *,
+    .stTabs [data-baseweb="tab"][aria-selected="false"] * {
+        color: #334155 !important;
+        -webkit-text-fill-color: #334155 !important;
+        opacity: 1 !important;
+    }
+    .stTabs button[aria-selected="false"]:hover,
+    .stTabs [data-baseweb="tab"][aria-selected="false"]:hover {
+        background: #ECFEFF !important;
+        border-color: rgba(14, 116, 144, 0.24) !important;
+    }
+    .stTabs button[aria-selected="false"]:hover *,
+    .stTabs [data-baseweb="tab"][aria-selected="false"]:hover * {
+        color: #0E7490 !important;
+        -webkit-text-fill-color: #0E7490 !important;
+    }
+    .stTabs button[aria-selected="true"],
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #0F766E 0%, #2563EB 100%) !important;
+        border-color: rgba(15, 118, 110, 0.34) !important;
+        border-bottom-color: rgba(15, 118, 110, 0.34) !important;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.20) !important;
+    }
+    .stTabs button[aria-selected="true"] *,
+    .stTabs [data-baseweb="tab"][aria-selected="true"] * {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        opacity: 1 !important;
+    }
+
+    div[data-testid="stSlider"] [data-baseweb="slider"] {
+        padding-top: 0.6rem !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div {
+        background: #E2E8F0 !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div > div {
+        background: #E2E8F0 !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div > div > div {
+        background: linear-gradient(90deg, #14B8A6 0%, #2563EB 100%) !important;
+    }
+    div[data-testid="stSlider"] [role="slider"] {
+        background: #0F766E !important;
+        border: 3px solid #FBFDF8 !important;
+        box-shadow: 0 6px 16px rgba(15, 118, 110, 0.28) !important;
+    }
+    div[data-testid="stSlider"] [data-testid="stThumbValue"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [class*="ThumbValue"] {
+        background: #E0F2F1 !important;
+        border: 1px solid rgba(15, 118, 110, 0.18) !important;
+        box-shadow: 0 6px 14px rgba(15, 118, 110, 0.10) !important;
+        color: #0F766E !important;
+        -webkit-text-fill-color: #0F766E !important;
+        border-radius: 7px !important;
+        font-weight: 700 !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] [class*="TickBar"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [class*="InnerThumb"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [class*="Thumb"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] div {
+        -webkit-text-fill-color: inherit;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] span,
+    div[data-testid="stSlider"] [data-baseweb="slider"] p {
+        color: #475569 !important;
+        -webkit-text-fill-color: #475569 !important;
+        font-weight: 600 !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="background-color: rgb(0, 104, 201)"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="background: rgb(0, 104, 201)"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="rgb(0, 104, 201)"] {
+        background: #E0F2F1 !important;
+        background-color: #E0F2F1 !important;
+        border: 1px solid rgba(15, 118, 110, 0.18) !important;
+        color: #0F766E !important;
+        -webkit-text-fill-color: #0F766E !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="background-color: rgb(0, 104, 201)"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="background: rgb(0, 104, 201)"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="rgb(0, 104, 201)"] * {
+        color: #0F766E !important;
+        -webkit-text-fill-color: #0F766E !important;
+    }
+    div[data-testid="stSlider"] [data-testid="stTickBarMin"],
+    div[data-testid="stSlider"] [data-testid="stTickBarMax"] {
+        color: #64748B !important;
+        -webkit-text-fill-color: #64748B !important;
+        font-weight: 600 !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="rgb(255, 75, 75)"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="#ff4b4b"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="255, 75, 75"] {
+        background: #E0F2F1 !important;
+        background-color: #E0F2F1 !important;
+        border: 1px solid rgba(15, 118, 110, 0.18) !important;
+        color: #0F766E !important;
+        -webkit-text-fill-color: #0F766E !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="rgb(255, 75, 75)"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="#ff4b4b"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="255, 75, 75"] * {
+        color: #0F766E !important;
+        -webkit-text-fill-color: #0F766E !important;
+    }
+    div[data-testid="stSlider"] [role="slider"]::before {
+        background: #E0F2F1 !important;
+        color: #0F766E !important;
+    }
+    div[data-testid="stSlider"] [role="slider"]::after {
+        background: #E0F2F1 !important;
+        color: #0F766E !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] [aria-valuenow] {
+        color: #0F766E !important;
+        -webkit-text-fill-color: #0F766E !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] [aria-valuenow] * {
+        color: #0F766E !important;
+        -webkit-text-fill-color: #0F766E !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="background-color"] {
+        border-radius: 999px !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div > div > div {
+        background: linear-gradient(90deg, #14B8A6 0%, #2563EB 100%) !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div > div > div > div {
+        background: linear-gradient(90deg, #14B8A6 0%, #2563EB 100%) !important;
+    }
+    div[data-testid="stSlider"] [role="slider"] {
+        background: #0F766E !important;
+        border-color: #FBFDF8 !important;
+    }
+    div[data-testid="stSlider"] [role="slider"] * {
+        color: #0F172A !important;
+        -webkit-text-fill-color: #0F172A !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] span,
+    div[data-testid="stSlider"] [data-baseweb="slider"] p,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="transform"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="position: absolute"] {
+        color: transparent !important;
+        -webkit-text-fill-color: transparent !important;
+    }
+    div[data-testid="stTabs"] button,
+    div[data-testid="stTabs"] [role="tab"] {
+        opacity: 1 !important;
+        color: #334155 !important;
+        -webkit-text-fill-color: #334155 !important;
+    }
+    div[data-testid="stTabs"] button[aria-selected="true"],
+    div[data-testid="stTabs"] [role="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #0F766E 0%, #2563EB 100%) !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+    div[data-testid="stTabs"] button[aria-selected="true"] *,
+    div[data-testid="stTabs"] [role="tab"][aria-selected="true"] * {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    .slider-readout {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: -8px 0 12px 0;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(236,253,245,0.96), rgba(219,234,254,0.92));
+        border: 1px solid rgba(15,118,110,0.14);
+        box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+        color: #0F766E;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .slider-readout span {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #14B8A6, #2563EB);
+        box-shadow: 0 0 0 4px rgba(20,184,166,0.12);
+    }
+
+    /* ---------- Modern product-dashboard polish ---------- */
+    .block-container {
+        max-width: 1380px;
+        padding-top: 1.35rem;
+        padding-left: 2.25rem;
+        padding-right: 2.25rem;
+    }
+    .hero-wrap,
+    .config-panel,
+    .stat-card,
+    .forecast-tile,
+    .wp-wrap,
+    .chart-shell,
+    .mini-kpi,
+    div[data-testid="stDataFrame"] {
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-color: rgba(15, 23, 42, 0.08) !important;
+    }
+    .hero-wrap {
+        border-radius: 24px;
+        padding: 26px 30px;
+        background:
+            linear-gradient(135deg, rgba(255,255,255,0.78), rgba(236,253,245,0.78)),
+            radial-gradient(circle at 82% 16%, rgba(37,99,235,0.16), transparent 34%),
+            radial-gradient(circle at 18% 24%, rgba(20,184,166,0.16), transparent 32%);
+        box-shadow: 0 24px 70px rgba(15, 23, 42, 0.10);
+    }
+    .hero-title {
+        font-size: 27px;
+        letter-spacing: -0.035em;
+    }
+    .hero-sub {
+        color: #475569;
+        font-size: 14px;
+    }
+    .hero-badge {
+        border-radius: 18px;
+        background: linear-gradient(135deg, #0F766E 0%, #2563EB 100%);
+        box-shadow: 0 16px 34px rgba(37, 99, 235, 0.22);
+    }
+    .live-pill {
+        color: #0F766E;
+        background: rgba(20, 184, 166, 0.12);
+        border-color: rgba(15, 118, 110, 0.18);
+    }
+    .live-dot {
+        background: #0F766E;
+        box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.38);
+    }
+    .section-label {
+        color: #1E293B;
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+    .section-label .tick {
+        width: 4px;
+        height: 16px;
+        background: linear-gradient(180deg, #0F766E, #2563EB);
+    }
+    .config-panel,
+    .stat-card,
+    .forecast-tile,
+    .wp-wrap,
+    .chart-shell {
+        background: rgba(251, 253, 248, 0.76) !important;
+        border-radius: 20px;
+        box-shadow: 0 18px 48px rgba(15, 23, 42, 0.075);
+    }
+    .stat-card,
+    .forecast-tile {
+        border-left-width: 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before,
+    .forecast-tile::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 5px;
+        background: linear-gradient(180deg, #0F766E, #2563EB);
+    }
+    .stat-card.tone-wicket::before,
+    .forecast-tile.f-wicket::before {
+        background: linear-gradient(180deg, #F43F5E, #FB7185);
+    }
+    .stat-card.tone-amber::before {
+        background: linear-gradient(180deg, #D97706, #FBBF24);
+    }
+    .forecast-tile.f-boundary::before {
+        background: linear-gradient(180deg, #0891B2, #14B8A6);
+    }
+    .stat-card:hover,
+    .forecast-tile:hover,
+    .mini-kpi:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+    }
+    .stat-card-badge {
+        border-radius: 10px;
+        background: rgba(15, 118, 110, 0.10) !important;
+    }
+    .stat-card-value,
+    .forecast-tile .fvalue {
+        letter-spacing: -0.03em;
+    }
+    .mini-kpi {
+        background: linear-gradient(145deg, rgba(255,255,255,0.88), rgba(236,253,245,0.74));
+        border-radius: 18px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .mini-kpi b {
+        color: #0F766E;
+    }
+    div[data-testid="stNumberInput"] input,
+    div[data-testid="stSelectbox"] > div > div {
+        background: rgba(255,255,255,0.78) !important;
+        border-color: rgba(15, 23, 42, 0.10) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05) !important;
+    }
+    label[data-testid="stWidgetLabel"] p {
+        color: #334155 !important;
+        font-size: 11.5px !important;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        border-radius: 999px !important;
+        padding: 5px !important;
+        background: rgba(255,255,255,0.58) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .stTabs button,
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 999px !important;
+        padding: 9px 18px !important;
+    }
+    .wp-track {
+        height: 12px;
+        background: #E2E8F0;
+    }
+    .wp-fill {
+        background: linear-gradient(90deg, #0F766E 0%, #14B8A6 45%, #2563EB 100%);
+    }
+    div[data-testid="stDataFrame"] {
+        border-radius: 18px;
+        box-shadow: 0 18px 48px rgba(15, 23, 42, 0.075);
+    }
+
+    /* ---------- Vibrant light theme finish ---------- */
+    .stApp {
+        background:
+            radial-gradient(circle at 8% 10%, rgba(20,184,166,0.18), transparent 28%),
+            radial-gradient(circle at 92% 8%, rgba(37,99,235,0.16), transparent 28%),
+            radial-gradient(circle at 72% 86%, rgba(168,85,247,0.12), transparent 30%),
+            linear-gradient(135deg, #FFFDF5 0%, #F1FAF4 46%, #EEF6FF 100%) !important;
+    }
+    .hero-wrap {
+        background:
+            linear-gradient(135deg, rgba(255,255,255,0.74), rgba(236,253,245,0.80)),
+            radial-gradient(circle at 14% 20%, rgba(20,184,166,0.20), transparent 30%),
+            radial-gradient(circle at 82% 18%, rgba(37,99,235,0.18), transparent 36%),
+            radial-gradient(circle at 66% 92%, rgba(168,85,247,0.10), transparent 34%);
+    }
+    .hero-wrap::before {
+        background: radial-gradient(ellipse at top right, rgba(14,165,233,0.20) 0%, rgba(14,165,233,0) 68%);
+    }
+    .hero-wrap::after {
+        border-color: rgba(37,99,235,0.13);
+        box-shadow: inset 0 0 52px rgba(20,184,166,0.16);
+    }
+    .config-panel,
+    .stat-card,
+    .forecast-tile,
+    .wp-wrap,
+    .chart-shell {
+        background:
+            linear-gradient(145deg, rgba(255,255,255,0.82), rgba(246,253,247,0.74)) !important;
+        border-color: rgba(15,118,110,0.10) !important;
+    }
+    .mini-kpi {
+        background:
+            linear-gradient(145deg, rgba(255,255,255,0.88), rgba(239,246,255,0.78)) !important;
+        border-color: rgba(37,99,235,0.10) !important;
+    }
+    .stat-card.tone-floodlight::before,
+    .forecast-tile.f-neutral::before {
+        background: linear-gradient(180deg, #2563EB, #A855F7);
+    }
+    .section-label .tick {
+        background: linear-gradient(180deg, #14B8A6, #2563EB, #A855F7);
+    }
+    .stTabs button[aria-selected="true"],
+    .stTabs [data-baseweb="tab"][aria-selected="true"],
+    div[data-testid="stTabs"] button[aria-selected="true"],
+    div[data-testid="stTabs"] [role="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #14B8A6 0%, #2563EB 58%, #7C3AED 100%) !important;
+        box-shadow: 0 12px 28px rgba(37,99,235,0.22) !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div,
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div > div {
+        background: #DDEFE1 !important;
+    }
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div > div > div,
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div > div > div > div {
+        background: linear-gradient(90deg, #8DDCCB 0%, #7DB8F5 100%) !important;
+    }
+    div[data-testid="stSlider"] [role="slider"] {
+        background: #2CBFAE !important;
+        border-color: #F8FCF5 !important;
+        box-shadow: 0 8px 18px rgba(44,191,174,0.20) !important;
+    }
+    div[data-testid="stSlider"] [data-testid="stThumbValue"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [class*="ThumbValue"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="background-color: rgb(0, 104, 201)"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="rgb(0, 104, 201)"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="background-color: rgb(20, 184, 166)"],
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="rgb(20, 184, 166)"] {
+        background: #EAF8F3 !important;
+        background-color: #EAF8F3 !important;
+        border: 1px solid rgba(44,191,174,0.24) !important;
+        color: #0F172A !important;
+        -webkit-text-fill-color: #0F172A !important;
+        box-shadow: 0 6px 14px rgba(15,23,42,0.08) !important;
+    }
+    div[data-testid="stSlider"] [data-testid="stThumbValue"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [class*="ThumbValue"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="rgb(0, 104, 201)"] *,
+    div[data-testid="stSlider"] [data-baseweb="slider"] [style*="rgb(20, 184, 166)"] * {
+        color: #0F172A !important;
+        -webkit-text-fill-color: #0F172A !important;
+    }
+    .slider-readout {
+        background: linear-gradient(135deg, rgba(250,255,250,0.98), rgba(234,248,243,0.96));
+        color: #0F172A;
+        border-color: rgba(44,191,174,0.18);
+    }
+    .slider-readout span {
+        background: linear-gradient(135deg, #8DDCCB, #7DB8F5);
+    }
+    .wp-fill {
+        background: linear-gradient(90deg, #14B8A6 0%, #2563EB 60%, #7C3AED 100%);
+    }
+
+    /* ---------- Final UX refinements ---------- */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(15,118,110,0.36) transparent;
+    }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, rgba(20,184,166,0.42), rgba(37,99,235,0.32));
+        border-radius: 999px;
+        border: 3px solid transparent;
+        background-clip: padding-box;
+    }
+    .block-container > div {
+        animation: fade-slide-in 0.42s ease both;
+    }
+    @keyframes fade-slide-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    button,
+    [role="button"],
+    div[data-testid="stSelectbox"],
+    div[data-testid="stNumberInput"] {
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    div[data-testid="stSelectbox"]:hover,
+    div[data-testid="stNumberInput"]:hover {
+        transform: translateY(-1px);
+    }
+    div[data-testid="stNumberInput"]:hover > div::after {
+        background: linear-gradient(135deg, #DDF7EE, #DBEAFE);
+        transform: translateY(-50%) scale(1.04);
+    }
+    div[data-testid="stDataFrame"] {
+        background: rgba(255,255,255,0.72);
+        border-radius: 18px;
+    }
+    div[data-testid="stAlert"] {
+        box-shadow: 0 14px 38px rgba(15,23,42,0.075);
+    }
+    div[data-testid="stMarkdownContainer"] a {
+        color: #0F766E !important;
+        text-decoration-color: rgba(15,118,110,0.32) !important;
+        text-underline-offset: 3px;
+        font-weight: 700;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        position: sticky;
+        top: 8px;
+        z-index: 20;
+    }
+    .forecast-tile .fhead,
+    .stat-card-head {
+        min-height: 28px;
+    }
+    .chart-shell {
+        padding: 20px;
+    }
+    .hr-fade {
+        margin: 22px 0 24px 0;
+        background: linear-gradient(90deg, transparent 0%, rgba(15,118,110,0.18) 18%, rgba(37,99,235,0.18) 70%, transparent 100%);
+    }
+    @media (max-width: 900px) {
+        .block-container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .hero-wrap {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 22px;
+        }
+        .hero-right {
+            width: 100%;
+            justify-content: space-between;
+        }
+        .mini-strip {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .stTabs [data-baseweb="tab-list"] {
+            width: 100%;
+            overflow-x: auto;
+        }
+    }
+    @media (max-width: 560px) {
+        .mini-strip {
+            grid-template-columns: 1fr;
+        }
+        .hero-title {
+            font-size: 22px;
+        }
+        .session-chip {
+            align-items: flex-start;
+        }
+    }
 
     /* ---------- Alerts ---------- */
     div[data-testid="stAlert"] { border-radius: 12px; background-color: var(--bg-panel); border: 1px solid var(--border-hair); }
@@ -522,6 +1235,93 @@ def calculate_historical_win_percentage(balls_left, wickets_lost, current_score,
     calibrated_pct = (k_neighbors['CHASE_WON'].mean() * 100) * ((10 - wickets_lost) / 10.0) ** 0.45
     return max(min(calibrated_pct, 98.0), 2.0)
 
+def render_event_probability_chart(probabilities):
+    df_events = pd.DataFrame({
+        "Event": ["Single / Dot", "Boundary", "Dismissal Risk"],
+        "Probability": [probabilities[0] * 100, probabilities[1] * 100, probabilities[2] * 100],
+        "Color": ["#2563EB", "#0F766E", "#F43F5E"]
+    })
+    chart = (
+        alt.Chart(df_events)
+        .mark_bar(cornerRadiusTopRight=10, cornerRadiusBottomRight=10, size=26)
+        .encode(
+            x=alt.X(
+                "Probability:Q",
+                title=None,
+                scale=alt.Scale(domain=[0, 100]),
+                axis=alt.Axis(format=".0f", grid=True, labelPadding=8)
+            ),
+            y=alt.Y("Event:N", title=None, sort=None, axis=alt.Axis(labelPadding=12)),
+            color=alt.Color("Event:N", scale=alt.Scale(range=df_events["Color"].tolist()), legend=None),
+            tooltip=[alt.Tooltip("Event:N"), alt.Tooltip("Probability:Q", format=".1f")]
+        )
+        .properties(height=150, background="transparent")
+        .configure_view(strokeWidth=0, fill="transparent")
+        .configure_axis(
+            gridColor="#E6EEE6",
+            labelColor="#475569",
+            domain=False,
+            tickColor="#CBD5E1",
+            labelFont="Inter",
+            titleFont="Inter"
+        )
+    )
+    st.markdown('<div class="chart-shell">', unsafe_allow_html=True)
+    st.altair_chart(chart, use_container_width=True, theme=None)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+def render_matchup_threat_chart(df_analysis, batter_name):
+    chart_df = df_analysis[[
+        "Active Opposing Bowler",
+        f"{batter_name} Wicket Danger %",
+        f"{batter_name} Boundary Leak %"
+    ]].melt("Active Opposing Bowler", var_name="Signal", value_name="Percent")
+    chart_df["Signal"] = chart_df["Signal"].str.replace(f"{batter_name} ", "", regex=False).str.replace(" %", "", regex=False)
+
+    chart = (
+        alt.Chart(chart_df)
+        .mark_bar(cornerRadiusTopLeft=7, cornerRadiusTopRight=7)
+        .encode(
+            x=alt.X(
+                "Active Opposing Bowler:N",
+                title=None,
+                sort="-y",
+                axis=alt.Axis(labelAngle=-35, labelLimit=140, labelPadding=10)
+            ),
+            y=alt.Y(
+                "Percent:Q",
+                title="Predicted probability (%)",
+                axis=alt.Axis(grid=True, labelPadding=8)
+            ),
+            color=alt.Color(
+                "Signal:N",
+                scale=alt.Scale(range=["#F43F5E", "#0F766E"]),
+                legend=alt.Legend(orient="top", title=None, symbolType="square")
+            ),
+            xOffset="Signal:N",
+            tooltip=[
+                alt.Tooltip("Active Opposing Bowler:N", title="Bowler"),
+                alt.Tooltip("Signal:N"),
+                alt.Tooltip("Percent:Q", format=".1f")
+            ]
+        )
+        .properties(height=360, background="transparent")
+        .configure_view(strokeWidth=0, fill="transparent")
+        .configure_axis(
+            gridColor="#E6EEE6",
+            labelColor="#475569",
+            titleColor="#334155",
+            domain=False,
+            tickColor="#CBD5E1",
+            labelFont="Inter",
+            titleFont="Inter"
+        )
+        .configure_legend(labelColor="#334155", labelFont="Inter")
+    )
+    st.markdown('<div class="chart-shell">', unsafe_allow_html=True)
+    st.altair_chart(chart, use_container_width=True, theme=None)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 # --- APP LAYOUT RUNNER ---
 model, encoders = load_ml_objects()
 df_rosters = get_team_rosters()
@@ -559,8 +1359,8 @@ else:
             sim_batter = st.selectbox("Active Striker", all_batters_global, index=0)
             sim_bowler = st.selectbox("Active Bowler", all_bowlers_global, index=0)
             current_score = st.number_input("Current Runs Scored", min_value=0, value=120)
-            wickets_down = st.slider("Wickets Lost", 0, 9, 3)
-            overs_completed = st.slider("Overs Completed", 0.0, 19.5, 15.0, 0.1)
+            wickets_down = st.number_input("Wickets Lost", min_value=0, max_value=9, value=3, step=1)
+            overs_completed = st.number_input("Overs Completed", min_value=0.0, max_value=19.5, value=15.0, step=0.1, format="%.1f")
             target_to_chase = st.number_input("Target to Chase", min_value=0, value=160)
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -619,6 +1419,16 @@ else:
             balls_remaining = max(120 - total_balls_bowled, 0)
             crr = (current_score / total_balls_bowled) * 6 if total_balls_bowled > 0 else 0.0
             rrr = ((target_to_chase - current_score) / balls_remaining) * 6 if target_to_chase > 0 and balls_remaining > 0 else 0.0
+            runs_needed = max(target_to_chase - current_score, 0)
+
+            st.markdown(f"""
+                <div class="mini-strip">
+                    <div class="mini-kpi"><span>Balls Left</span><b>{balls_remaining}</b></div>
+                    <div class="mini-kpi"><span>Runs Needed</span><b>{runs_needed}</b></div>
+                    <div class="mini-kpi"><span>Current RR</span><b>{crr:.2f}</b></div>
+                    <div class="mini-kpi"><span>Required RR</span><b>{rrr:.2f}</b></div>
+                </div>
+            """, unsafe_allow_html=True)
 
             st.markdown('<p class="section-label"><span class="tick"></span>Win Probability</p>', unsafe_allow_html=True)
             win_pct = calculate_historical_win_percentage(balls_remaining, wickets_down, current_score, target_to_chase)
@@ -649,6 +1459,7 @@ else:
                     st.markdown(f'<div class="forecast-tile f-boundary"><div class="fhead"><span class="fdot"></span><span class="flabel">Boundary</span></div><div class="fvalue">{ml_p[1]*100:.1f}%</div></div>', unsafe_allow_html=True)
                 with pm3:
                     st.markdown(f'<div class="forecast-tile f-wicket"><div class="fhead"><span class="fdot"></span><span class="flabel">Dismissal Risk</span></div><div class="fvalue">{ml_p[2]*100:.1f}%</div></div>', unsafe_allow_html=True)
+                render_event_probability_chart(ml_p)
             except Exception as ml_err:
                 st.error(f"⚠️ ML Prediction Error: {str(ml_err)}")
 
@@ -706,4 +1517,4 @@ else:
                 # matplotlib not available for background_gradient — fall back to plain table
                 st.dataframe(df_analysis, use_container_width=True)
             st.markdown('<p class="section-label"><span class="tick"></span>Visual Matchup Threat Spectrum</p>', unsafe_allow_html=True)
-            st.bar_chart(df_analysis.set_index("Active Opposing Bowler")[[f"{batter_1} Wicket Danger %", f"{batter_1} Boundary Leak %"]])
+            render_matchup_threat_chart(df_analysis, batter_1)
