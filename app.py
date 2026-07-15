@@ -416,39 +416,51 @@ st.markdown("""
         color: var(--text-primary) !important;
         font-size: 14px !important;
         min-height: 44px !important;
-        padding-right: 42px !important;
+        padding-right: 76px !important;
         box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
     }
     div[data-testid="stNumberInput"] > div {
         position: relative !important;
     }
-    div[data-testid="stNumberInput"] > div::after {
-        content: "+";
-        position: absolute;
-        right: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 24px;
-        height: 24px;
-        border-radius: 999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #EAF8F3, #EAF2FF);
-        border: 1px solid rgba(44,191,174,0.20);
-        color: #0F766E;
-        font-size: 16px;
-        font-weight: 800;
-        line-height: 1;
-        pointer-events: none;
-        box-shadow: 0 6px 14px rgba(15,23,42,0.06);
-    }
     div[data-testid="stNumberInput"] input:focus {
         border-color: rgba(44,191,174,0.42) !important;
         box-shadow: 0 0 0 4px rgba(44,191,174,0.12), 0 10px 26px rgba(15,23,42,0.06) !important;
     }
-    div[data-testid="stNumberInput"] button {
-        display: none !important;
+    /* Both increment and decrement buttons, styled as matching pill controls */
+    div[data-testid="stNumberInputStepUp"],
+    div[data-testid="stNumberInputStepDown"] {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        position: absolute !important;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        border-radius: 999px !important;
+        background: linear-gradient(135deg, #EAF8F3, #EAF2FF) !important;
+        border: 1px solid rgba(44,191,174,0.20) !important;
+        box-shadow: 0 6px 14px rgba(15,23,42,0.06);
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        z-index: 2;
+    }
+    div[data-testid="stNumberInputStepUp"] {
+        right: 14px;
+    }
+    div[data-testid="stNumberInputStepDown"] {
+        right: 44px;
+    }
+    div[data-testid="stNumberInputStepUp"]:hover,
+    div[data-testid="stNumberInputStepDown"]:hover {
+        background: linear-gradient(135deg, #DDF7EE, #DBEAFE) !important;
+        transform: translateY(-50%) scale(1.06);
+    }
+    div[data-testid="stNumberInputStepUp"] svg,
+    div[data-testid="stNumberInputStepDown"] svg {
+        fill: #0F766E !important;
+        width: 14px;
+        height: 14px;
     }
     div[data-testid="stSelectbox"] > div > div {
         background-color: var(--bg-panel-3) !important;
@@ -1053,8 +1065,9 @@ st.markdown("""
     div[data-testid="stNumberInput"]:hover {
         transform: translateY(-1px);
     }
-    div[data-testid="stNumberInput"]:hover > div::after {
-        background: linear-gradient(135deg, #DDF7EE, #DBEAFE);
+    div[data-testid="stNumberInput"]:hover div[data-testid="stNumberInputStepUp"],
+    div[data-testid="stNumberInput"]:hover div[data-testid="stNumberInputStepDown"] {
+        background: linear-gradient(135deg, #DDF7EE, #DBEAFE) !important;
         transform: translateY(-50%) scale(1.04);
     }
     div[data-testid="stDataFrame"] {
